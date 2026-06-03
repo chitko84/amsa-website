@@ -67,75 +67,6 @@ $events = getAllEvents();
             font-family: 'Nunito', sans-serif;
             background: #f8f9fa;
         }
-
-
-/* Dropdown Styles */
-.sidebar-menu .dropdown-menu-wrapper {
-    position: relative;
-}
-
-.sidebar-menu .dropdown-toggle-btn {
-    display: block;
-    padding: 12px 25px;
-    color: rgba(255,255,255,0.8);
-    text-decoration: none;
-    transition: all 0.3s;
-    font-weight: 500;
-    cursor: pointer;
-}
-
-.sidebar-menu .dropdown-toggle-btn:hover {
-    background: rgba(139,58,58,0.5);
-    color: white;
-    padding-left: 35px;
-}
-
-.sidebar-menu .dropdown-toggle-btn i:first-child {
-    margin-right: 10px;
-    width: 25px;
-}
-
-.dropdown-arrow {
-    float: right;
-    margin-top: 5px;
-    transition: transform 0.3s;
-}
-
-.sidebar-menu .dropdown-items {
-    display: none;
-    background: rgba(0,0,0,0.3);
-    width: 100%;
-}
-
-.sidebar-menu .dropdown-items a {
-    display: block;
-    padding: 10px 25px 10px 55px;
-    color: rgba(255,255,255,0.7);
-    text-decoration: none;
-    font-size: 14px;
-    transition: all 0.3s;
-}
-
-.sidebar-menu .dropdown-items a:hover {
-    background: rgba(139,58,58,0.5);
-    color: white;
-    padding-left: 65px;
-}
-
-.sidebar-menu .dropdown-items a i {
-    margin-right: 10px;
-    width: 20px;
-}
-
-.sidebar-menu .dropdown-menu-wrapper.active .dropdown-items {
-    display: block;
-}
-
-.sidebar-menu .dropdown-menu-wrapper.active .dropdown-arrow {
-    transform: rotate(180deg);
-}
-
-
         
         /* Sidebar Styles */
         .sidebar {
@@ -366,7 +297,7 @@ $events = getAllEvents();
 </head>
 <body>
     <!-- Sidebar -->
-    <!-- <div class="sidebar">
+    <div class="sidebar">
         <div class="sidebar-header">
             <img src="../img/logo.png" alt="AMSA Logo">
             <h4>AMSA Admin</h4>
@@ -385,60 +316,11 @@ $events = getAllEvents();
             <a href="#">
                 <i class="fas fa-users"></i> Volunteers
             </a>
-            <a href="../point/admin_points.php">
-                <i class="fas fa-users"></i> PointManagement
-            </a>
             <a href="logout.php">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
-    </div> -->
-    <div class="sidebar">
-    <div class="sidebar-header">
-        <img src="../img/logo.png" alt="AMSA Logo">
-        <h4>AMSA Admin</h4>
-        <p>Community Engagement Manager</p>
     </div>
-    <div class="sidebar-menu">
-        <a href="dashboard.php" class="active">
-            <i class="fas fa-tachometer-alt"></i> Dashboard
-        </a>
-        <a href="add_event.php">
-            <i class="fas fa-plus-circle"></i> Add New Event
-        </a>
-        <a href="#">
-            <i class="fas fa-chart-line"></i> Analytics
-        </a>
-        <a href="#">
-            <i class="fas fa-users"></i> Volunteers
-        </a>
-        
-        <div class="dropdown-menu-wrapper">
-            <div class="dropdown-toggle-btn">
-                <i class="fas fa-star"></i> Point Management
-                <i class="fas fa-chevron-down dropdown-arrow"></i>
-            </div>
-            <div class="dropdown-items">
-                <a href="../point/point_categories_admin.php">
-                    <i class="fas fa-tags"></i> Manage Categories
-                </a>
-                <a href="../point/admin_points.php">
-                    <i class="fas fa-clipboard-list"></i> Manage Requests
-                </a>
-                <a href="../point/point_request.php">
-                    <i class="fas fa-paper-plane"></i> Submit Request
-                </a>
-                <a href="../point/my_points.php">
-                    <i class="fas fa-chart-line"></i> My Points
-                </a>
-            </div>
-        </div>
-        
-        <a href="logout.php">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
-</div>
     
     <!-- Main Content -->
     <div class="main-content">
@@ -691,18 +573,6 @@ function checkDuplicates() {
     });
     alert('Duplicate check complete! Yellow rows indicate possible duplicates.');
 }
-
-// Dropdown toggle functionality
-document.addEventListener('DOMContentLoaded', function() {
-    var dropdownToggle = document.querySelector('.dropdown-toggle-btn');
-    if (dropdownToggle) {
-        dropdownToggle.addEventListener('click', function() {
-            var wrapper = this.parentElement;
-            wrapper.classList.toggle('active');
-        });
-    }
-});
-
 </script>
 
 <!-- Update the testimonial title cell to have class testimonial-title -->
