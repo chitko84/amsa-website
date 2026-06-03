@@ -2,441 +2,533 @@
 session_start();
 require_once '../config/database.php';
 
+// Check if logged in
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
     exit();
 }
 
-$newsCategories = ['news', 'announcement', 'workshop', 'volunteer'];
-
-function deletePostWithImages($id, $mode) {
-    global $conn;
-
-    if ($mode === 'event') {
-        $checkStmt = $conn->prepare("SELECT id FROM post WHERE id = ? AND category = 'community_engagement'");
-    } else {
-        $checkStmt = $conn->prepare("SELECT id FROM post WHERE id = ? AND category IN ('news', 'announcement', 'workshop', 'volunteer')");
-    }
-
-    $checkStmt->bind_param("i", $id);
-    $checkStmt->execute();
-    $post = $checkStmt->get_result()->fetch_assoc();
-
-    if (!$post) {
-        return false;
-    }
-
+// Handle event deletion
+if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
+    $id = $_GET['delete'];
+    
+    // First delete images
     $imgStmt = $conn->prepare("SELECT img_name FROM image WHERE post_id = ?");
     $imgStmt->bind_param("i", $id);
     $imgStmt->execute();
     $images = $imgStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-
+    
     foreach ($images as $image) {
         $filepath = '../uploads/' . $image['img_name'];
         if (file_exists($filepath)) {
             unlink($filepath);
         }
     }
-
-    $delStmt = $conn->prepare("DELETE FROM post WHERE id = ?");
-    $delStmt->bind_param("i", $id);
-    $delStmt->execute();
-
-    return true;
-}
-
-if (isset($_GET['delete_event']) && is_numeric($_GET['delete_event'])) {
-    deletePostWithImages((int) $_GET['delete_event'], 'event');
+    
+    // Delete post
+    $stmt = $conn->prepare("DELETE FROM post WHERE id = ? AND category = 'community_engagement'");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    
     header('Location: dashboard.php?msg=deleted');
     exit();
 }
 
-if (isset($_GET['delete_news']) && is_numeric($_GET['delete_news'])) {
-    deletePostWithImages((int) $_GET['delete_news'], 'news');
-    header('Location: dashboard.php?msg=news_deleted');
-    exit();
-}
-
 $events = getAllEvents();
-$newsPosts = getAllNews();
-$achievements = getAllAchievements();
-$testimonials = getAllTestimonials();
-$imgCount = $conn->query("SELECT COUNT(*) as count FROM image")->fetch_assoc()['count'];
-
-function dashboardCategoryLabel($category) {
-    return $category === 'community_engagement'
-        ? 'Community engagement'
-        : ucfirst(str_replace('_', ' ', $category));
-}
-
-function dashboardExcerpt($content, $length = 70) {
-    $text = trim(strip_tags(htmlspecialchars_decode($content ?? '')));
-
-    if (strlen($text) <= $length) {
-        return $text;
-    }
-
-    return substr($text, 0, $length) . '...';
-}
-
-function dashboardPostImage($postId) {
-    $images = getEventImages($postId);
-
-    return !empty($images) ? '../uploads/' . $images[0]['img_name'] : '../img/logo.png';
-}
-
-$messages = [
-    'added' => 'Event added successfully!',
-    'updated' => 'Event updated successfully!',
-    'deleted' => 'Post deleted successfully!',
-    'news_added' => 'News post added successfully!',
-    'news_updated' => 'News post updated successfully!',
-    'news_deleted' => 'News post deleted successfully!'
-];
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>Admin Dashboard - AMSA</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    
+    <!-- Favicon -->
     <link href="../img/logo.png" rel="icon">
+    
+    <!-- Google Web Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icon Font Stylesheet -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Customized Bootstrap Stylesheet -->
     <link href="../css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
         :root {
-            --wine: #2c0410;
-            --red: #8b3a3a;
-            --gold: #c6b511;
-            --soft: #f7f4ef;
-            --ink: #1b1820;
-            --muted: #6d6878;
+            --secondary: #8B3A3A;
+            --secondary-light: #B55A4A;
         }
-
+        
         body {
             font-family: 'Nunito', sans-serif;
-            background: #f5f6f8;
-            color: var(--ink);
+            background: #f8f9fa;
         }
 
+
+/* Dropdown Styles */
+.sidebar-menu .dropdown-menu-wrapper {
+    position: relative;
+}
+
+.sidebar-menu .dropdown-toggle-btn {
+    display: block;
+    padding: 12px 25px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: all 0.3s;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.sidebar-menu .dropdown-toggle-btn:hover {
+    background: rgba(139,58,58,0.5);
+    color: white;
+    padding-left: 35px;
+}
+
+.sidebar-menu .dropdown-toggle-btn i:first-child {
+    margin-right: 10px;
+    width: 25px;
+}
+
+.dropdown-arrow {
+    float: right;
+    margin-top: 5px;
+    transition: transform 0.3s;
+}
+
+.sidebar-menu .dropdown-items {
+    display: none;
+    background: rgba(0,0,0,0.3);
+    width: 100%;
+}
+
+.sidebar-menu .dropdown-items a {
+    display: block;
+    padding: 10px 25px 10px 55px;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.sidebar-menu .dropdown-items a:hover {
+    background: rgba(139,58,58,0.5);
+    color: white;
+    padding-left: 65px;
+}
+
+.sidebar-menu .dropdown-items a i {
+    margin-right: 10px;
+    width: 20px;
+}
+
+.sidebar-menu .dropdown-menu-wrapper.active .dropdown-items {
+    display: block;
+}
+
+.sidebar-menu .dropdown-menu-wrapper.active .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+
+        
+        /* Sidebar Styles */
         .sidebar {
-            background: linear-gradient(135deg, var(--wine), #4a1a2a);
+            background: linear-gradient(135deg, #2c0410, #4a1a2a);
             min-height: 100vh;
             position: fixed;
             width: 280px;
+            transition: all 0.3s;
             z-index: 1000;
         }
-
+        
         .sidebar-header {
             padding: 30px 20px;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-
+        
         .sidebar-header img {
             width: 80px;
             margin-bottom: 15px;
         }
-
+        
         .sidebar-header h4 {
             color: white;
             margin: 0;
-            font-weight: 800;
+            font-weight: 700;
         }
-
+        
         .sidebar-header p {
-            color: rgba(255,255,255,0.68);
+            color: rgba(255,255,255,0.7);
             font-size: 14px;
             margin: 5px 0 0;
         }
-
+        
         .sidebar-menu {
             padding: 20px 0;
         }
-
+        
         .sidebar-menu a {
             display: block;
             padding: 12px 25px;
-            color: rgba(255,255,255,0.82);
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
-            transition: all 0.25s;
-            font-weight: 600;
+            transition: all 0.3s;
+            font-weight: 500;
         }
-
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background: rgba(139,58,58,0.65);
+        
+        .sidebar-menu a:hover {
+            background: rgba(139,58,58,0.5);
             color: white;
+            padding-left: 35px;
         }
-
+        
         .sidebar-menu a.active {
-            border-left: 4px solid var(--gold);
+            background: #8B3A3A;
+            color: white;
+            border-left: 4px solid #c6b511;
         }
-
+        
         .sidebar-menu a i {
             margin-right: 10px;
             width: 25px;
         }
-
+        
+        /* Main Content Styles */
         .main-content {
             margin-left: 280px;
-            padding: 32px;
-            min-height: 100vh;
+            padding: 30px;
         }
-
-        .top-navbar,
-        .stat-card,
-        .table-container {
-            background: white;
-            border: 1px solid rgba(27, 24, 32, 0.06);
-            border-radius: 12px;
-            box-shadow: 0 18px 45px rgba(27, 24, 32, 0.06);
-        }
-
+        
+        /* Top Navbar */
         .top-navbar {
-            padding: 20px 24px;
-            margin-bottom: 24px;
+            background: white;
+            border-radius: 15px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-
+        
         .welcome-text h3 {
             margin: 0;
-            font-weight: 800;
-            color: var(--wine);
+            font-weight: 700;
+            color: #2c0410;
         }
-
-        .welcome-text p,
-        .admin-info,
-        .text-muted-soft {
-            color: var(--muted);
+        
+        .welcome-text p {
+            margin: 5px 0 0;
+            color: #666;
         }
-
+        
         .admin-info {
             text-align: right;
         }
-
-        .stat-card {
-            padding: 22px;
-            margin-bottom: 24px;
+        
+        .admin-name {
+            font-weight: 700;
+            color: #8B3A3A;
         }
-
+        
+        /* Stats Cards */
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
         .stat-icon {
-            width: 54px;
-            height: 54px;
-            background: linear-gradient(135deg, var(--red), #b55a4a);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #8B3A3A, #B55A4A);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 14px;
+            margin-bottom: 15px;
         }
-
+        
         .stat-icon i {
-            font-size: 24px;
+            font-size: 30px;
             color: white;
         }
-
+        
         .stat-number {
-            font-size: 30px;
+            font-size: 32px;
             font-weight: 800;
-            color: var(--wine);
-            line-height: 1;
-            margin-bottom: 7px;
+            color: #2c0410;
+            margin: 10px 0 5px;
         }
-
+        
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        /* Table Styles */
         .table-container {
-            padding: 24px;
-            margin-bottom: 28px;
-            overflow: hidden;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-
-        .section-heading {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 18px;
+        
+        .table-container h4 {
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: #2c0410;
         }
-
-        .section-heading h4 {
-            margin: 0;
-            font-weight: 800;
-            color: var(--wine);
-        }
-
+        
         .table {
             margin-bottom: 0;
-            vertical-align: middle;
         }
-
+        
         .table thead th {
-            background: #faf8f5;
-            border-bottom: 2px solid var(--wine);
-            color: var(--wine);
-            font-weight: 800;
-            white-space: nowrap;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 700;
+            color: #2c0410;
         }
-
-        .table td {
-            color: #575166;
+        
+        .table tbody tr:hover {
+            background: #f8f9fa;
         }
-
-        .post-image {
-            width: 64px;
-            height: 52px;
+        
+        .badge-category {
+            background: linear-gradient(135deg, #8B3A3A, #B55A4A);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .btn-edit {
+            background: #ffc107;
+            color: #000;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, #8B3A3A, #B55A4A);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139,58,58,0.3);
+        }
+        
+        .event-image {
+            width: 60px;
+            height: 50px;
             object-fit: cover;
             border-radius: 8px;
-            background: #f7f4ef;
         }
-
-        .badge-category {
-            background: linear-gradient(135deg, var(--red), #b55a4a);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        .btn-add,
-        .btn-edit,
-        .btn-delete {
-            border: 0;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 800;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, var(--red), #b55a4a);
-            color: white;
-            padding: 10px 18px;
-        }
-
-        .btn-edit {
-            background: #fff4c2;
-            color: #6d5400;
-            padding: 7px 11px;
-        }
-
-        .btn-delete {
-            background: #ffe0e3;
-            color: #9b1c2d;
-            padding: 7px 11px;
-        }
-
-        .actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
+        
         @media (max-width: 768px) {
             .sidebar {
-                position: relative;
-                width: 100%;
-                min-height: auto;
+                margin-left: -280px;
             }
-
             .main-content {
                 margin-left: 0;
-                padding: 20px;
-            }
-
-            .admin-info {
-                text-align: left;
-                margin-top: 12px;
-            }
-
-            .section-heading {
-                align-items: flex-start;
-                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-    <aside class="sidebar">
+    <!-- Sidebar -->
+    <!-- <div class="sidebar">
         <div class="sidebar-header">
             <img src="../img/logo.png" alt="AMSA Logo">
             <h4>AMSA Admin</h4>
-            <p>Content Manager</p>
+            <p>Community Engagement Manager</p>
         </div>
-        <nav class="sidebar-menu">
-            <a href="dashboard.php" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-            <a href="add_event.php"><i class="fas fa-plus-circle"></i> Add CME</a>
-            <a href="add_news.php"><i class="fas fa-newspaper"></i> Add News</a>
-            <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <section class="top-navbar">
+        <div class="sidebar-menu">
+            <a href="dashboard.php" class="active">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="add_event.php">
+                <i class="fas fa-plus-circle"></i> Add New Event
+            </a>
+            <a href="#">
+                <i class="fas fa-chart-line"></i> Analytics
+            </a>
+            <a href="#">
+                <i class="fas fa-users"></i> Volunteers
+            </a>
+            <a href="../point/admin_points.php">
+                <i class="fas fa-users"></i> PointManagement
+            </a>
+            <a href="logout.php">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div> -->
+    <div class="sidebar">
+    <div class="sidebar-header">
+        <img src="../img/logo.png" alt="AMSA Logo">
+        <h4>AMSA Admin</h4>
+        <p>Community Engagement Manager</p>
+    </div>
+    <div class="sidebar-menu">
+        <a href="dashboard.php" class="active">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a href="add_event.php">
+            <i class="fas fa-plus-circle"></i> Add New Event
+        </a>
+        <a href="#">
+            <i class="fas fa-chart-line"></i> Analytics
+        </a>
+        <a href="#">
+            <i class="fas fa-users"></i> Volunteers
+        </a>
+        
+        <div class="dropdown-menu-wrapper">
+            <div class="dropdown-toggle-btn">
+                <i class="fas fa-star"></i> Point Management
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            <div class="dropdown-items">
+                <a href="../point/point_categories_admin.php">
+                    <i class="fas fa-tags"></i> Manage Categories
+                </a>
+                <a href="../point/admin_points.php">
+                    <i class="fas fa-clipboard-list"></i> Manage Requests
+                </a>
+                <a href="../point/point_request.php">
+                    <i class="fas fa-paper-plane"></i> Submit Request
+                </a>
+                <a href="../point/my_points.php">
+                    <i class="fas fa-chart-line"></i> My Points
+                </a>
+            </div>
+        </div>
+        
+        <a href="logout.php">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <div class="top-navbar">
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <div class="welcome-text">
                         <h3>Welcome back, <?php echo htmlspecialchars($_SESSION['admin_name']); ?>!</h3>
-                        <p class="mb-0">Manage AMSA events, news, achievements, and testimonials.</p>
+                        <p>Here's what's happening with your community events today.</p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="admin-info">
-                        <p class="mb-0"><i class="fas fa-envelope me-2"></i><?php echo htmlspecialchars($_SESSION['admin_email']); ?></p>
-                        <p class="mb-0 mt-1"><i class="fas fa-clock me-2"></i><?php echo date('F d, Y h:i A'); ?></p>
+                        <p class="mb-0">
+                            <i class="fas fa-envelope me-2"></i> <?php echo htmlspecialchars($_SESSION['admin_email']); ?>
+                        </p>
+                        <p class="mb-0 mt-1">
+                            <i class="fas fa-clock me-2"></i> Last login: <?php echo date('F d, Y h:i A'); ?>
+                        </p>
                     </div>
                 </div>
             </div>
-        </section>
-
+        </div>
+        
+        <!-- Stats Cards -->
         <div class="row">
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
                     <div class="stat-number"><?php echo count($events); ?></div>
-                    <div class="text-muted-soft">Community Events</div>
+                    <div class="stat-label">Total Events</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-newspaper"></i></div>
-                    <div class="stat-number"><?php echo count($newsPosts); ?></div>
-                    <div class="text-muted-soft">News Posts</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">1,234</div>
+                    <div class="stat-label">Volunteers</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-trophy"></i></div>
-                    <div class="stat-number"><?php echo count($achievements); ?></div>
-                    <div class="text-muted-soft">Achievements</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-number">5,678</div>
+                    <div class="stat-label">Beneficiaries</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-image"></i></div>
-                    <div class="stat-number"><?php echo (int) $imgCount; ?></div>
-                    <div class="text-muted-soft">Photos Uploaded</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="stat-number"><?php 
+                        $imgCount = $conn->query("SELECT COUNT(*) as count FROM image")->fetch_assoc()['count'];
+                        echo $imgCount;
+                    ?></div>
+                    <div class="stat-label">Photos Uploaded</div>
                 </div>
             </div>
         </div>
-
-        <?php if (isset($_GET['msg']) && isset($messages[$_GET['msg']])): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($messages[$_GET['msg']]); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+        
+        <!-- Alert Messages -->
+        <?php if (isset($_GET['msg'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <?php 
+                if ($_GET['msg'] == 'added') echo 'Event added successfully!';
+                if ($_GET['msg'] == 'updated') echo 'Event updated successfully!';
+                if ($_GET['msg'] == 'deleted') echo 'Event deleted successfully!';
+            ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
         <?php endif; ?>
-
-        <section class="table-container">
-            <div class="section-heading">
+        
+        <!-- Events Table -->
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4><i class="fas fa-list me-2"></i> Community Engagement Events</h4>
-                <a href="add_event.php" class="btn-add"><i class="fas fa-plus"></i> Add Event</a>
+                <a href="add_event.php" class="btn btn-add">
+                    <i class="fas fa-plus me-2"></i> Add New Event
+                </a>
             </div>
+            
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -452,145 +544,170 @@ $messages = [
                     </thead>
                     <tbody>
                         <?php if (empty($events)): ?>
-                            <tr><td colspan="7" class="text-center py-5 text-muted-soft">No community events found.</td></tr>
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                <p class="text-muted">No events found. Click "Add New Event" to get started!</p>
+                            </td>
+                        </tr>
                         <?php else: ?>
                             <?php foreach ($events as $event): ?>
-                                <tr>
-                                    <td>#<?php echo (int) $event['id']; ?></td>
-                                    <td><img src="<?php echo htmlspecialchars(dashboardPostImage($event['id'])); ?>" alt="Event" class="post-image"></td>
-                                    <td class="fw-bold"><?php echo htmlspecialchars(htmlspecialchars_decode($event['title'])); ?></td>
-                                    <td><span class="badge-category"><?php echo htmlspecialchars(dashboardCategoryLabel($event['category'])); ?></span></td>
-                                    <td><?php echo date('M d, Y', strtotime($event['upload_date'])); ?></td>
-                                    <td><?php echo htmlspecialchars($event['author_name'] ?? 'Admin'); ?></td>
-                                    <td>
-                                        <div class="actions">
-                                            <a href="edit_event.php?id=<?php echo (int) $event['id']; ?>" class="btn-edit"><i class="fas fa-edit"></i> Edit</a>
-                                            <a href="?delete_event=<?php echo (int) $event['id']; ?>" class="btn-delete" onclick="return confirm('Delete this event?')"><i class="fas fa-trash"></i> Delete</a>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>#<?php echo $event['id']; ?></td>
+                                <td>
+                                    <?php 
+                                    $images = getEventImages($event['id']);
+                                    $firstImage = !empty($images) ? '../uploads/' . $images[0]['img_name'] : 'https://picsum.photos/60/50';
+                                    ?>
+                                    <img src="<?php echo $firstImage; ?>" alt="Event" class="event-image">
+                                </td>
+                                <td class="fw-bold"><?php echo htmlspecialchars($event['title']); ?></td>
+                                <td><span class="badge-category"><?php echo ucfirst(str_replace('_', ' ', $event['category'])); ?></span></td>
+                                <td><?php echo date('M d, Y', strtotime($event['upload_date'])); ?></td>
+                                <td><?php echo htmlspecialchars($event['author_name'] ?? 'Admin'); ?></td>
+                                <td>
+                                    <a href="edit_event.php?id=<?php echo $event['id']; ?>" class="btn-edit">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="?delete=<?php echo $event['id']; ?>" class="btn-delete" onclick="return confirm('Are you sure you want to delete this event? This action cannot be undone!')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </td>
+                            </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
-        </section>
+        </div>
+    </div>
+    <!-- Add this after your existing events table -->
+<div class="table-container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="fas fa-trophy me-2"></i> Achievements</h4>
+        <a href="add_content.php?type=achievement" class="btn btn-add">
+            <i class="fas fa-plus me-2"></i> Add Achievement
+        </a>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Content</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                $achievements = getAllAchievements();
+                foreach ($achievements as $achievement): 
+                ?>
+                <tr>
+                    <td>#<?php echo $achievement['id']; ?></td>
+                    <td><?php echo htmlspecialchars($achievement['title']); ?></td>
+                    <td><?php echo substr(htmlspecialchars($achievement['content']), 0, 50); ?>...</td>
+                    <td><?php echo date('M d, Y', strtotime($achievement['upload_date'])); ?></td>
+                    <td>
+                        <a href="edit_content.php?id=<?php echo $achievement['id']; ?>&type=achievement" class="btn-edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="delete_content.php?id=<?php echo $achievement['id']; ?>&type=achievement" class="btn-delete" onclick="return confirm('Are you sure?')">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-        <section class="table-container">
-            <div class="section-heading">
-                <h4><i class="fas fa-newspaper me-2"></i> News & Updates</h4>
-                <a href="add_news.php" class="btn-add"><i class="fas fa-plus"></i> Add News</a>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Image</th>
-                            <th>Title</th>
-                            <th>Category</th>
-                            <th>Date Posted</th>
-                            <th>Author</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($newsPosts)): ?>
-                            <tr><td colspan="7" class="text-center py-5 text-muted-soft">No news posts found.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($newsPosts as $news): ?>
-                                <tr>
-                                    <td>#<?php echo (int) $news['id']; ?></td>
-                                    <td><img src="<?php echo htmlspecialchars(dashboardPostImage($news['id'])); ?>" alt="News" class="post-image"></td>
-                                    <td class="fw-bold"><?php echo htmlspecialchars(htmlspecialchars_decode($news['title'])); ?></td>
-                                    <td><span class="badge-category"><?php echo htmlspecialchars(dashboardCategoryLabel($news['category'])); ?></span></td>
-                                    <td><?php echo date('M d, Y', strtotime($news['upload_date'])); ?></td>
-                                    <td><?php echo htmlspecialchars($news['author_name'] ?? 'Admin'); ?></td>
-                                    <td>
-                                        <div class="actions">
-                                            <a href="edit_news.php?id=<?php echo (int) $news['id']; ?>" class="btn-edit"><i class="fas fa-edit"></i> Edit</a>
-                                            <a href="?delete_news=<?php echo (int) $news['id']; ?>" class="btn-delete" onclick="return confirm('Delete this news post?')"><i class="fas fa-trash"></i> Delete</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+<!-- Testimonials Table -->
+<div class="table-container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="fas fa-comments me-2"></i> Testimonials</h4>
+        <a href="add_content.php?type=testimonial" class="btn btn-add">
+            <i class="fas fa-plus me-2"></i> Add Testimonial
+        </a>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Testimonial</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                $testimonials = getAllTestimonials();
+                foreach ($testimonials as $testimonial): 
+                ?>
+                <tr>
+                    <td>#<?php echo $testimonial['id']; ?></td>
+                    <td><?php echo htmlspecialchars($testimonial['title']); ?></td>
+                    <td><?php echo substr(htmlspecialchars($testimonial['content']), 0, 50); ?>...</td>
+                    <td><?php echo date('M d, Y', strtotime($testimonial['upload_date'])); ?></td>
+                    <td>
+                        <a href="edit_content.php?id=<?php echo $testimonial['id']; ?>&type=testimonial" class="btn-edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="delete_content.php?id=<?php echo $testimonial['id']; ?>&type=testimonial" class="btn-delete" onclick="return confirm('Are you sure?')">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Add this button at the top of the testimonials section -->
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i> 
+    Total Testimonials: <?php echo count($testimonials); ?> 
+    <button class="btn btn-sm btn-warning ms-3" onclick="checkDuplicates()">
+        <i class="fas fa-search"></i> Check for Duplicates
+    </button>
+</div>
 
-        <section class="table-container">
-            <div class="section-heading">
-                <h4><i class="fas fa-trophy me-2"></i> Achievements</h4>
-                <a href="add_content.php?type=achievement" class="btn-add"><i class="fas fa-plus"></i> Add Achievement</a>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Content</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($achievements)): ?>
-                            <tr><td colspan="5" class="text-center py-5 text-muted-soft">No achievements found.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($achievements as $achievement): ?>
-                                <tr>
-                                    <td>#<?php echo (int) $achievement['id']; ?></td>
-                                    <td class="fw-bold"><?php echo htmlspecialchars(htmlspecialchars_decode($achievement['title'])); ?></td>
-                                    <td><?php echo htmlspecialchars(dashboardExcerpt($achievement['content'])); ?></td>
-                                    <td><?php echo date('M d, Y', strtotime($achievement['upload_date'])); ?></td>
-                                    <td><a href="delete_content.php?id=<?php echo (int) $achievement['id']; ?>&type=achievement" class="btn-delete" onclick="return confirm('Delete this achievement?')"><i class="fas fa-trash"></i> Delete</a></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+<script>
+function checkDuplicates() {
+    let titles = [];
+    document.querySelectorAll('.testimonial-title').forEach(el => {
+        let title = el.innerText;
+        if (titles.includes(title)) {
+            el.closest('tr').style.backgroundColor = '#fff3cd';
+        }
+        titles.push(title);
+    });
+    alert('Duplicate check complete! Yellow rows indicate possible duplicates.');
+}
 
-        <section class="table-container">
-            <div class="section-heading">
-                <h4><i class="fas fa-comments me-2"></i> Testimonials</h4>
-                <a href="add_content.php?type=testimonial" class="btn-add"><i class="fas fa-plus"></i> Add Testimonial</a>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Testimonial</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($testimonials)): ?>
-                            <tr><td colspan="5" class="text-center py-5 text-muted-soft">No testimonials found.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($testimonials as $testimonial): ?>
-                                <tr>
-                                    <td>#<?php echo (int) $testimonial['id']; ?></td>
-                                    <td class="fw-bold"><?php echo htmlspecialchars(htmlspecialchars_decode($testimonial['title'])); ?></td>
-                                    <td><?php echo htmlspecialchars(dashboardExcerpt($testimonial['content'])); ?></td>
-                                    <td><?php echo date('M d, Y', strtotime($testimonial['upload_date'])); ?></td>
-                                    <td><a href="delete_content.php?id=<?php echo (int) $testimonial['id']; ?>&type=testimonial" class="btn-delete" onclick="return confirm('Delete this testimonial?')"><i class="fas fa-trash"></i> Delete</a></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+// Dropdown toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    var dropdownToggle = document.querySelector('.dropdown-toggle-btn');
+    if (dropdownToggle) {
+        dropdownToggle.addEventListener('click', function() {
+            var wrapper = this.parentElement;
+            wrapper.classList.toggle('active');
+        });
+    }
+});
 
+</script>
+
+<!-- Update the testimonial title cell to have class testimonial-title -->
+<td class="testimonial-title"><?php echo htmlspecialchars($testimonial['title']); ?></td>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
