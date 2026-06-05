@@ -35,19 +35,20 @@ function postText($value) {
 function postImage($postId, $fallback = 'img/blog-1.jpg') {
     $images = getEventImages($postId);
 
-    return !empty($images) ? 'uploads/' . $images[0]['img_name'] : $fallback;
+    return !empty($images) ? 'uploads/' . basename($images[0]['img_name']) : $fallback;
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>AMSA - Events & News</title>
+    <title>AMSA AIU | Events & News</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="AMSA events and news" name="keywords" />
-    <meta content="Latest events and news from AIU Myanmar Student Association" name="description" />
+    <meta content="Read AMSA AIU events, announcements, workshops, volunteer updates, and community news." name="description" />
 
-    <link href="img/logo.png" rel="icon" />
+    <link href="img/logo.png" rel="icon" type="image/png" />
+    <link href="img/logo.png" rel="apple-touch-icon" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -366,26 +367,25 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
     </style>
   </head>
   <body>
+    <!-- Topbar Start -->
     <div class="container-fluid bg-dark px-5 d-none d-lg-block">
-      <div class="row gx-0">
-        <div class="col-lg-8 text-center text-lg-start mb-2 mb-lg-0">
-          <div class="d-inline-flex align-items-center" style="height: 45px">
-            <small class="me-3 text-light"><i class="fa fa-map-marker-alt me-2"></i>Jln Tun Razak, Bandar Alor Setar, 05200 Alor Setar, Kedah, Malaysia</small>
-            <small class="me-3 text-light"><i class="fa fa-phone-alt me-2"></i>+012 345 6789</small>
-            <small class="text-light"><i class="fa fa-envelope-open me-2"></i>amsa@gmail.com</small>
-          </div>
+        <div class="row gx-0">
+            <div class="col-lg-8 text-center text-lg-start mb-2 mb-lg-0">
+                <div class="d-inline-flex align-items-center" style="height: 45px;">
+                    <small class="me-3 text-light"><i class="fa fa-map-marker-alt me-2"></i>Albukhary International University</small>
+                    <small class="text-light"><i class="fa fa-envelope-open me-2"></i><a class="text-light" href="mailto:amsa@student.aiu.edu.my">amsa@student.aiu.edu.my</a></small>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center text-lg-end">
+                <div class="d-inline-flex align-items-center" style="height: 45px;">
+                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="https://www.facebook.com/amsa.aiu/about/?locale=ms_MY&_rdr" target="_blank" rel="noopener" aria-label="AMSA Facebook"><i class="fab fa-facebook-f fw-normal"></i></a>
+                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="https://my.linkedin.com/company/amsa-aiu-myanmar-student-association" target="_blank" rel="noopener" aria-label="AMSA LinkedIn"><i class="fab fa-linkedin-in fw-normal"></i></a>
+                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle" href="https://www.instagram.com/amsa_aiu/" target="_blank" rel="noopener" aria-label="AMSA Instagram"><i class="fab fa-instagram fw-normal"></i></a>
+                </div>
+            </div>
         </div>
-        <div class="col-lg-4 text-center text-lg-end">
-          <div class="d-inline-flex align-items-center" style="height: 45px">
-            <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="#"><i class="fab fa-twitter fw-normal"></i></a>
-            <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="#"><i class="fab fa-facebook-f fw-normal"></i></a>
-            <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="#"><i class="fab fa-linkedin-in fw-normal"></i></a>
-            <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="#"><i class="fab fa-instagram fw-normal"></i></a>
-            <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle" href="#"><i class="fab fa-youtube fw-normal"></i></a>
-          </div>
-        </div>
-      </div>
     </div>
+    <!-- Topbar End -->
 
     <div class="container-fluid position-relative p-0">
       <nav class="navbar navbar-expand-lg navbar-dark px-5 py-3 py-lg-0">
@@ -411,18 +411,19 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
               <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Projects</a>
               <div class="dropdown-menu m-0">
                 <a href="cme.php" class="dropdown-item">Community Engagements</a>
-                <a href="fundrasing.html" class="dropdown-item">Fundrasing</a>
+                <a href="fundraising.php" class="dropdown-item">Fundraising</a>
               </div>
             </div>
             <a href="contact.html" class="nav-item nav-link">Contact</a>
             <a href="devteam.html" class="nav-item nav-link">Dev Team</a>
           </div>
-          <a href="#" class="btn btn-primary py-2 px-4 ms-3">Register</a>
+          <a href="point/register.php" class="btn btn-primary amsa-btn amsa-btn-primary py-2 px-4 ms-3">Register</a>
         </div>
       </nav>
 
-      <header class="events-hero">
+      <header class="events-hero amsa-page-header">
         <div class="container">
+          <div class="amsa-hero-breadcrumb mb-3"><a href="index.html">Home</a><span>Events & News</span></div>
           <span class="hero-kicker">AMSA updates</span>
           <h1>Stories, events, and student moments in one place.</h1>
           <p>Follow AMSA announcements, community engagement programs, workshops, and the latest news from our student community.</p>
@@ -451,7 +452,18 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
             <div class="row g-0 align-items-stretch">
               <div class="col-lg-6">
                 <div class="featured-media">
-                  <img src="<?php echo htmlspecialchars(postImage($featuredPost['id'], 'img/blog-2.jpg')); ?>" alt="<?php echo postText($featuredPost['title']); ?>">
+                  <?php $featuredImages = getEventImages($featuredPost['id']); ?>
+                  <?php if (!empty($featuredImages)): ?>
+                    <div class="content-gallery gallery-count-<?php echo min(count($featuredImages), 3); ?> w-100 h-100">
+                      <?php foreach (array_slice($featuredImages, 0, 3) as $featuredImage): ?>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#postModal<?php echo (int) $featuredPost['id']; ?>">
+                          <img src="uploads/<?php echo htmlspecialchars(basename($featuredImage['img_name'])); ?>" alt="<?php echo postText($featuredPost['title']); ?>">
+                        </a>
+                      <?php endforeach; ?>
+                    </div>
+                  <?php else: ?>
+                    <img src="<?php echo htmlspecialchars(postImage($featuredPost['id'], 'img/blog-2.jpg')); ?>" alt="<?php echo postText($featuredPost['title']); ?>">
+                  <?php endif; ?>
                 </div>
               </div>
               <div class="col-lg-6 d-flex align-items-center">
@@ -459,7 +471,7 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
                   <span class="badge-soft mb-3"><i class="fa fa-bolt"></i> Latest <?php echo htmlspecialchars(postCategoryLabel($featuredPost['category'])); ?></span>
                   <h2 class="text-white mb-3"><?php echo postText($featuredPost['title']); ?></h2>
                   <p><?php echo htmlspecialchars(postExcerpt($featuredPost['content'], 190)); ?></p>
-                  <button class="btn btn-primary mt-3" type="button" data-bs-toggle="modal" data-bs-target="#postModal<?php echo (int) $featuredPost['id']; ?>">
+                  <button class="btn btn-primary amsa-btn amsa-btn-primary mt-3" type="button" data-bs-toggle="modal" data-bs-target="#postModal<?php echo (int) $featuredPost['id']; ?>">
                     Read Latest <i class="fa fa-arrow-right ms-2"></i>
                   </button>
                 </div>
@@ -493,7 +505,7 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
         </section>
 
         <?php if (empty($posts)): ?>
-          <div class="empty-state">
+          <div class="empty-state amsa-empty-state">
             <i class="fas fa-newspaper fa-3x text-primary mb-3"></i>
             <h3>No News or Events Yet</h3>
             <p class="mb-0">Add news from the admin dashboard and it will appear here automatically.</p>
@@ -503,14 +515,24 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
             <?php foreach ($posts as $post): ?>
               <?php
                 $images = getEventImages($post['id']);
-                $image = !empty($images) ? 'uploads/' . $images[0]['img_name'] : 'img/blog-1.jpg';
+                $image = !empty($images) ? 'uploads/' . basename($images[0]['img_name']) : 'img/blog-1.jpg';
                 $label = postCategoryLabel($post['category']);
                 $searchText = strtolower(htmlspecialchars_decode($post['title']) . ' ' . strip_tags(htmlspecialchars_decode($post['content'])));
               ?>
               <div class="col-md-6 col-xl-4 post-item" data-category="<?php echo htmlspecialchars($post['category']); ?>" data-search="<?php echo htmlspecialchars($searchText); ?>">
-                <article class="card news-card h-100">
+                <article class="card news-card h-100 amsa-card">
                   <div class="post-media">
-                    <img src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo postText($post['title']); ?>">
+                    <?php if (!empty($images)): ?>
+                      <div class="content-gallery gallery-count-<?php echo min(count($images), 3); ?> w-100 h-100">
+                        <?php foreach (array_slice($images, 0, 3) as $cardImage): ?>
+                          <a href="#" data-bs-toggle="modal" data-bs-target="#postModal<?php echo (int) $post['id']; ?>">
+                            <img src="uploads/<?php echo htmlspecialchars(basename($cardImage['img_name'])); ?>" alt="<?php echo postText($post['title']); ?>">
+                          </a>
+                        <?php endforeach; ?>
+                      </div>
+                    <?php else: ?>
+                      <img src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo postText($post['title']); ?>">
+                    <?php endif; ?>
                   </div>
                   <div class="news-card-body d-flex flex-column h-100">
                     <div>
@@ -519,10 +541,9 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
                       <p class="post-excerpt"><?php echo htmlspecialchars(postExcerpt($post['content'])); ?></p>
                       <div class="post-meta">
                         <span><i class="fa fa-calendar-alt me-1"></i><?php echo date('d M Y', strtotime($post['upload_date'])); ?></span>
-                        <span><i class="fa fa-user me-1"></i><?php echo htmlspecialchars($post['author_name'] ?? 'AMSA Team'); ?></span>
                       </div>
                     </div>
-                    <button class="btn btn-primary btn-sm mt-4 align-self-start" type="button" data-bs-toggle="modal" data-bs-target="#postModal<?php echo (int) $post['id']; ?>">
+                    <button class="btn btn-primary btn-sm amsa-btn amsa-btn-primary amsa-btn-sm mt-4 align-self-start" type="button" data-bs-toggle="modal" data-bs-target="#postModal<?php echo (int) $post['id']; ?>">
                       Read More <i class="fa fa-arrow-right ms-2"></i>
                     </button>
                   </div>
@@ -533,24 +554,12 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                   <div class="modal-content">
                     <?php if (!empty($images)): ?>
-                      <div id="postCarousel<?php echo (int) $post['id']; ?>" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-                          <?php foreach ($images as $index => $modalImage): ?>
-                            <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
-                              <img src="uploads/<?php echo htmlspecialchars($modalImage['img_name']); ?>" class="modal-hero-image" alt="<?php echo postText($post['title']); ?>">
-                            </div>
-                          <?php endforeach; ?>
-                        </div>
-                        <?php if (count($images) > 1): ?>
-                          <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel<?php echo (int) $post['id']; ?>" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                          </button>
-                          <button class="carousel-control-next" type="button" data-bs-target="#postCarousel<?php echo (int) $post['id']; ?>" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                          </button>
-                        <?php endif; ?>
+                      <div class="modal-gallery p-3">
+                        <?php foreach (array_slice($images, 0, 3) as $modalImage): ?>
+                          <a href="uploads/<?php echo htmlspecialchars(basename($modalImage['img_name'])); ?>" target="_blank" rel="noopener">
+                            <img src="uploads/<?php echo htmlspecialchars(basename($modalImage['img_name'])); ?>" alt="<?php echo postText($post['title']); ?>">
+                          </a>
+                        <?php endforeach; ?>
                       </div>
                     <?php else: ?>
                       <img src="<?php echo htmlspecialchars($image); ?>" class="modal-hero-image" alt="<?php echo postText($post['title']); ?>">
@@ -578,81 +587,71 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
       </div>
     </main>
 
+    <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light mt-5 wow fadeInUp" data-wow-delay="0.1s">
-      <div class="container">
-        <div class="row gx-5">
-          <div class="col-lg-4 col-md-6 footer-about">
-            <div class="d-flex flex-column align-items-center justify-content-center text-center h-100 bg-primary p-4">
-              <a href="index.html" class="navbar-brand p-0">
-                <img src="img/logo.png" alt="AMSA" class="navbar-logo">
-              </a>
-              <p class="mt-3 mb-4">We Rise by Lifting Others</p>
-              <form action="">
-                <div class="input-group">
-                  <input type="text" class="form-control border-white p-3" placeholder="Your Email">
-                  <button class="btn btn-dark">Sign Up</button>
-                </div>
-              </form>
-            </div>
-          </div>
-          <div class="col-lg-8 col-md-6">
+        <div class="container">
             <div class="row gx-5">
-              <div class="col-lg-4 col-md-12 pt-5 mb-5">
-                <div class="section-title section-title-sm position-relative pb-3 mb-4">
-                  <h3 class="text-light mb-0">Get In Touch</h3>
+                <div class="col-lg-4 col-md-6 footer-about">
+                    <div class="d-flex flex-column align-items-center justify-content-center text-center h-100 bg-primary p-4">
+                        <a href="index.html" class="navbar-brand p-0">
+                            <img src="img/logo.png" alt="AMSA AIU" class="navbar-logo">
+                        </a>
+                        <p class="mt-3 mb-4">AMSA AIU supports Myanmar students at Albukhary International University through community, culture, leadership, and service.</p>
+                        <div class="d-flex">
+                            <a class="btn btn-primary btn-square me-2" href="https://www.facebook.com/amsa.aiu/about/?locale=ms_MY&_rdr" target="_blank" rel="noopener" aria-label="AMSA Facebook"><i class="fab fa-facebook-f fw-normal"></i></a>
+                            <a class="btn btn-primary btn-square me-2" href="https://my.linkedin.com/company/amsa-aiu-myanmar-student-association" target="_blank" rel="noopener" aria-label="AMSA LinkedIn"><i class="fab fa-linkedin-in fw-normal"></i></a>
+                            <a class="btn btn-primary btn-square" href="https://www.instagram.com/amsa_aiu/" target="_blank" rel="noopener" aria-label="AMSA Instagram"><i class="fab fa-instagram fw-normal"></i></a>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex mb-2">
-                  <i class="bi bi-geo-alt text-primary me-2"></i>
-                  <p class="mb-0">Jln Tun Razak, Bandar Alor Setar, 05200 Alor Setar, Kedah, Malaysia</p>
+                <div class="col-lg-8 col-md-6">
+                    <div class="row gx-5">
+                        <div class="col-lg-4 col-md-12 pt-5 mb-5">
+                            <div class="section-title section-title-sm position-relative pb-3 mb-4">
+                                <h3 class="text-light mb-0">Contact</h3>
+                            </div>
+                            <div class="d-flex mb-2"><i class="bi bi-geo-alt text-primary me-2"></i><p class="mb-0">Albukhary International University</p></div>
+                            <div class="d-flex mb-2"><i class="bi bi-envelope-open text-primary me-2"></i><p class="mb-0"><a class="text-light" href="mailto:amsa@student.aiu.edu.my">amsa@student.aiu.edu.my</a></p></div>
+                        </div>
+                        <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
+                            <div class="section-title section-title-sm position-relative pb-3 mb-4">
+                                <h3 class="text-light mb-0">AMSA</h3>
+                            </div>
+                            <div class="link-animated d-flex flex-column justify-content-start">
+                                <a class="text-light mb-2" href="index.html"><i class="bi bi-arrow-right text-primary me-2"></i>Home</a>
+                                <a class="text-light mb-2" href="about.html"><i class="bi bi-arrow-right text-primary me-2"></i>About AMSA</a>
+                                <a class="text-light mb-2" href="committee.html"><i class="bi bi-arrow-right text-primary me-2"></i>Committee</a>
+                                <a class="text-light" href="contact.html"><i class="bi bi-arrow-right text-primary me-2"></i>Contact</a>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
+                            <div class="section-title section-title-sm position-relative pb-3 mb-4">
+                                <h3 class="text-light mb-0">Programs</h3>
+                            </div>
+                            <div class="link-animated d-flex flex-column justify-content-start">
+                                <a class="text-light mb-2" href="events.php"><i class="bi bi-arrow-right text-primary me-2"></i>Events & News</a>
+                                <a class="text-light mb-2" href="achievements.php"><i class="bi bi-arrow-right text-primary me-2"></i>Achievements</a>
+                                <a class="text-light mb-2" href="cme.php"><i class="bi bi-arrow-right text-primary me-2"></i>Community Engagement</a>
+                                <a class="text-light" href="fundraising.php"><i class="bi bi-arrow-right text-primary me-2"></i>Fundraising</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex mb-2">
-                  <i class="bi bi-envelope-open text-primary me-2"></i>
-                  <p class="mb-0">amsa@gmail.com</p>
-                </div>
-                <div class="d-flex mb-2">
-                  <i class="bi bi-telephone text-primary me-2"></i>
-                  <p class="mb-0">+012 345 67890</p>
-                </div>
-              </div>
-              <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
-                <div class="section-title section-title-sm position-relative pb-3 mb-4">
-                  <h3 class="text-light mb-0">Quick Links</h3>
-                </div>
-                <div class="link-animated d-flex flex-column justify-content-start">
-                  <a class="text-light mb-2" href="index.html"><i class="bi bi-arrow-right text-primary me-2"></i>Home</a>
-                  <a class="text-light mb-2" href="about.html"><i class="bi bi-arrow-right text-primary me-2"></i>About Us</a>
-                  <a class="text-light mb-2" href="events.php"><i class="bi bi-arrow-right text-primary me-2"></i>Events & News</a>
-                  <a class="text-light mb-2" href="committee.html"><i class="bi bi-arrow-right text-primary me-2"></i>Meet The Team</a>
-                  <a class="text-light" href="contact.html"><i class="bi bi-arrow-right text-primary me-2"></i>Contact Us</a>
-                </div>
-              </div>
-              <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
-                <div class="section-title section-title-sm position-relative pb-3 mb-4">
-                  <h3 class="text-light mb-0">Popular Links</h3>
-                </div>
-                <div class="link-animated d-flex flex-column justify-content-start">
-                  <a class="text-light mb-2" href="achievements.php"><i class="bi bi-arrow-right text-primary me-2"></i>Achievements</a>
-                  <a class="text-light mb-2" href="cme.php"><i class="bi bi-arrow-right text-primary me-2"></i>Community</a>
-                  <a class="text-light mb-2" href="fundrasing.html"><i class="bi bi-arrow-right text-primary me-2"></i>Fundraising</a>
-                  <a class="text-light" href="devteam.html"><i class="bi bi-arrow-right text-primary me-2"></i>Dev Team</a>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-    <div class="container-fluid text-white" style="background: #2c0410;">
-      <div class="container text-center">
-        <div class="row justify-content-end">
-          <div class="col-lg-8 col-md-6">
-            <div class="d-flex align-items-center justify-content-center" style="height: 75px;">
-              <p class="mb-0">&copy; <a class="text-white border-bottom" href="#">AIU Myanmar Student's Association</a>. All Rights Reserved.</p>
+    <div class="container-fluid text-white" style="background: #061429;">
+        <div class="container text-center">
+            <div class="row justify-content-end">
+                <div class="col-lg-8 col-md-6">
+                    <div class="d-flex align-items-center justify-content-center" style="height: 75px;">
+                        <p class="mb-0">&copy; <a class="text-white border-bottom" href="index.html">AMSA AIU</a>. All Rights Reserved.</p>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
+    <!-- Footer End -->
 
     <a href="#" class="btn btn-lg btn-primary btn-lg-square rounded back-to-top"><i class="bi bi-arrow-up"></i></a>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>

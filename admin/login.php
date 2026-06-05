@@ -1,9 +1,8 @@
 <?php
-session_start();
 require_once '../config/database.php';
 
 // Redirect if already logged in
-if (isset($_SESSION['admin_id'])) {
+if (isset($_SESSION['admin_id']) && isAdminRole(currentUserRole())) {
     header('Location: dashboard.php');
     exit();
 }
@@ -11,19 +10,30 @@ if (isset($_SESSION['admin_id'])) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!verifyCsrfToken()) {
+        $error = 'Your session token expired. Please try again.';
+    } else {
     $email = sanitize($_POST['email']);
     $password = $_POST['password'];
     
-    $stmt = $conn->prepare("SELECT id, name, email, password FROM user WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, name, email, password, role, status FROM user WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
     
     if ($user = $result->fetch_assoc()) {
-        if (password_verify($password, $user['password'])) {
+        if ($user['status'] !== 'active' || !isAdminRole($user['role'])) {
+            $error = 'Invalid email or password!';
+        } elseif (password_verify($password, $user['password'])) {
+            $role = normalizeRole($user['role']);
+            regenerateAuthSession();
             $_SESSION['admin_id'] = $user['id'];
             $_SESSION['admin_name'] = $user['name'];
             $_SESSION['admin_email'] = $user['email'];
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_role'] = $role;
             
             // Update last login
             $updateStmt = $conn->prepare("UPDATE user SET last_login = NOW() WHERE id = ?");
@@ -38,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         $error = 'Invalid email or password!';
     }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -49,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     
     <!-- Favicon -->
-    <link href="../img/logo.png" rel="icon">
+    <link href="../img/logo.png" rel="icon" type="image/png">
+    <link href="../img/logo.png" rel="apple-touch-icon">
     
     <!-- Google Web Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -60,10 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     <!-- Customized Bootstrap Stylesheet -->
     <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/amsa-design-system.css" rel="stylesheet">
     
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #5f2626 0%, #8b3a3a 55%, #b55a4a 100%);
             font-family: 'Nunito', sans-serif;
         }
         .login-container {
@@ -141,13 +154,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
             <div class="login-body">
                 <?php if ($error): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="alert alert-danger amsa-alert amsa-alert-error alert-dismissible fade show" role="alert">
                         <i class="fas fa-exclamation-triangle me-2"></i> <?php echo $error; ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
                 
                 <form method="POST" action="">
+                    <?php echo csrfInput(); ?>
                     <div class="mb-3">
                         <label for="email" class="form-label fw-bold">Email Address</label>
                         <div class="input-group">

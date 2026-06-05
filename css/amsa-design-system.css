@@ -1,0 +1,417 @@
+/*
+  AMSA Design System Foundation
+  Shared tokens and reusable UI primitives for public, admin, and points pages.
+*/
+
+:root {
+    --amsa-color-primary: #8b3a3a;
+    --amsa-color-primary-dark: #5f2626;
+    --amsa-color-primary-soft: #b55a4a;
+    --amsa-color-gold: #f4b942;
+    --amsa-color-gold-soft: #fff4cf;
+    --amsa-color-bg: #f8f3ef;
+    --amsa-color-surface: #ffffff;
+    --amsa-color-text: #2b2020;
+    --amsa-color-text-muted: #7b6666;
+    --amsa-color-border: #eadbd2;
+    --amsa-color-success: #2f8f57;
+    --amsa-color-error: #b44444;
+    --amsa-color-warning: #f4b942;
+    --amsa-color-info: #6b4a3d;
+    --amsa-color-active: #2f8f57;
+    --amsa-color-inactive: #8f7a72;
+    --amsa-color-suspended: #b44444;
+
+    --amsa-font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    --amsa-font-size-sm: 0.875rem;
+    --amsa-font-size-base: 1rem;
+    --amsa-font-size-lg: 1.125rem;
+    --amsa-line-height: 1.6;
+
+    --amsa-space-1: 0.25rem;
+    --amsa-space-2: 0.5rem;
+    --amsa-space-3: 0.75rem;
+    --amsa-space-4: 1rem;
+    --amsa-space-5: 1.5rem;
+    --amsa-space-6: 2rem;
+    --amsa-space-7: 3rem;
+
+    --amsa-radius-sm: 8px;
+    --amsa-radius-md: 12px;
+    --amsa-radius-lg: 18px;
+    --amsa-radius-pill: 999px;
+
+    --amsa-shadow-sm: 0 6px 18px rgba(95, 38, 38, 0.08);
+    --amsa-shadow-md: 0 14px 34px rgba(95, 38, 38, 0.12);
+    --amsa-shadow-lg: 0 22px 54px rgba(95, 38, 38, 0.16);
+
+    --amsa-transition-fast: 150ms ease;
+    --amsa-transition-base: 220ms ease;
+    --amsa-gradient-primary: linear-gradient(135deg, var(--amsa-color-primary-dark), var(--amsa-color-primary), var(--amsa-color-primary-soft));
+    --amsa-gradient-gold: linear-gradient(135deg, var(--amsa-color-gold), var(--amsa-color-gold-soft));
+}
+
+.amsa-page-header {
+    background: var(--amsa-gradient-primary);
+    color: #ffffff;
+    border-radius: var(--amsa-radius-lg);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    box-shadow: var(--amsa-shadow-md);
+}
+
+.amsa-page-header h1,
+.amsa-page-header h2 {
+    color: inherit;
+    margin-bottom: var(--amsa-space-2);
+}
+
+.amsa-section {
+    padding: clamp(2rem, 5vw, 4rem) 0;
+}
+
+.amsa-card,
+.amsa-stat-card {
+    background: var(--amsa-color-surface);
+    border: 1px solid var(--amsa-color-border);
+    border-radius: var(--amsa-radius-md);
+    box-shadow: var(--amsa-shadow-sm);
+}
+
+.amsa-card {
+    padding: var(--amsa-space-5);
+}
+
+.amsa-stat-card {
+    padding: var(--amsa-space-5);
+    border-left: 4px solid var(--amsa-color-gold);
+}
+
+.amsa-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--amsa-space-2);
+    border: 1px solid transparent;
+    border-radius: var(--amsa-radius-pill);
+    padding: 0.65rem 1.1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--amsa-transition-base), border-color var(--amsa-transition-base), color var(--amsa-transition-base), transform var(--amsa-transition-fast), box-shadow var(--amsa-transition-base);
+}
+
+.amsa-btn:hover {
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.amsa-btn-primary {
+    background: var(--amsa-color-primary);
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(139, 58, 58, 0.22);
+}
+
+.amsa-btn-primary:hover {
+    background: var(--amsa-color-primary-dark);
+    color: #ffffff;
+}
+
+.amsa-btn-secondary {
+    background: var(--amsa-color-gold);
+    color: var(--amsa-color-text);
+}
+
+.amsa-btn-secondary:hover {
+    background: #e6a92f;
+    color: var(--amsa-color-text);
+}
+
+.amsa-btn-danger {
+    background: var(--amsa-color-error);
+    color: #ffffff;
+}
+
+.amsa-btn-danger:hover {
+    background: #8f3030;
+    color: #ffffff;
+}
+
+.amsa-btn-ghost {
+    background: transparent;
+    border-color: var(--amsa-color-border);
+    color: var(--amsa-color-primary);
+}
+
+.amsa-btn-ghost:hover {
+    background: var(--amsa-color-gold-soft);
+    color: var(--amsa-color-primary-dark);
+}
+
+.amsa-btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: var(--amsa-font-size-sm);
+}
+
+.amsa-alert {
+    border: 1px solid transparent;
+    border-radius: var(--amsa-radius-md);
+    padding: var(--amsa-space-4) var(--amsa-space-5);
+    margin-bottom: var(--amsa-space-4);
+}
+
+.amsa-alert-success {
+    background: #e9f7ef;
+    border-color: #c7ead7;
+    color: #185a34;
+}
+
+.amsa-alert-error {
+    background: #fdeeee;
+    border-color: #f3c7c7;
+    color: #7a2525;
+}
+
+.amsa-alert-warning {
+    background: var(--amsa-color-gold-soft);
+    border-color: #f1d88a;
+    color: #6e4a09;
+}
+
+.amsa-alert-info {
+    background: #f7eee9;
+    border-color: var(--amsa-color-border);
+    color: var(--amsa-color-info);
+}
+
+.amsa-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--amsa-color-border);
+    border-radius: var(--amsa-radius-md);
+    background: var(--amsa-color-surface);
+    box-shadow: var(--amsa-shadow-sm);
+}
+
+.amsa-table {
+    width: 100%;
+    margin-bottom: 0;
+    color: var(--amsa-color-text);
+}
+
+.amsa-table thead th {
+    background: #f7eee9;
+    color: var(--amsa-color-primary-dark);
+    font-weight: 800;
+    border-bottom: 1px solid var(--amsa-color-border);
+}
+
+.amsa-table th,
+.amsa-table td {
+    vertical-align: middle;
+}
+
+.amsa-form-group {
+    margin-bottom: var(--amsa-space-4);
+}
+
+.amsa-form-control {
+    width: 100%;
+    border: 1px solid var(--amsa-color-border);
+    border-radius: var(--amsa-radius-sm);
+    padding: 0.75rem 0.9rem;
+    color: var(--amsa-color-text);
+    background: var(--amsa-color-surface);
+    transition: border-color var(--amsa-transition-base), box-shadow var(--amsa-transition-base);
+}
+
+.amsa-form-control:focus {
+    border-color: var(--amsa-color-primary);
+    box-shadow: 0 0 0 0.18rem rgba(139, 58, 58, 0.16);
+    outline: none;
+}
+
+.amsa-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--amsa-radius-pill);
+    padding: 0.35rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.amsa-badge-pending {
+    background: var(--amsa-color-gold-soft);
+    color: #7a520a;
+}
+
+.amsa-badge-approved,
+.amsa-badge-active {
+    background: #e9f7ef;
+    color: #185a34;
+}
+
+.amsa-badge-rejected,
+.amsa-badge-suspended {
+    background: #fdeeee;
+    color: #7a2525;
+}
+
+.amsa-badge-inactive {
+    background: #f1e8e3;
+    color: #6f5b55;
+}
+
+.amsa-badge-info {
+    background: #f7eee9;
+    color: var(--amsa-color-info);
+}
+
+.amsa-empty-state {
+    border: 1px dashed var(--amsa-color-border);
+    border-radius: var(--amsa-radius-md);
+    background: #fffaf4;
+    color: var(--amsa-color-text-muted);
+    padding: var(--amsa-space-6);
+    text-align: center;
+}
+
+.amsa-loader {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid var(--amsa-color-border);
+    border-top-color: var(--amsa-color-primary);
+    border-radius: 50%;
+    animation: amsa-spin 0.8s linear infinite;
+}
+
+@keyframes amsa-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.amsa-modal {
+    background: var(--amsa-color-surface);
+    border-radius: var(--amsa-radius-lg);
+    box-shadow: var(--amsa-shadow-lg);
+    border: 1px solid var(--amsa-color-border);
+}
+
+.amsa-upload-hint {
+    color: var(--amsa-color-text-muted);
+    font-size: var(--amsa-font-size-sm);
+    margin-top: var(--amsa-space-2);
+}
+
+.amsa-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--amsa-space-5);
+}
+
+.amsa-button-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--amsa-space-3);
+}
+
+@media (max-width: 768px) {
+    .amsa-section {
+        padding: var(--amsa-space-6) 0;
+    }
+
+    .amsa-page-header,
+    .amsa-card,
+    .amsa-stat-card {
+        padding: var(--amsa-space-4);
+    }
+
+    .amsa-button-group {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .amsa-button-group .amsa-btn,
+    .amsa-button-group .btn {
+        width: 100%;
+    }
+}
+
+/* Phase 8F responsive QA polish */
+img,
+svg {
+    max-width: 100%;
+}
+
+.amsa-card,
+.amsa-stat-card,
+.amsa-alert,
+.amsa-empty-state,
+.amsa-table {
+    overflow-wrap: anywhere;
+}
+
+.amsa-btn,
+.amsa-form-control,
+.amsa-table a,
+.amsa-card a,
+button,
+[type="button"],
+[type="submit"],
+a {
+    transition: background-color var(--amsa-transition-base), border-color var(--amsa-transition-base), color var(--amsa-transition-base), box-shadow var(--amsa-transition-base), transform var(--amsa-transition-base);
+}
+
+.amsa-btn:focus-visible,
+.amsa-form-control:focus-visible,
+button:focus-visible,
+[type="button"]:focus-visible,
+[type="submit"]:focus-visible,
+a:focus-visible {
+    outline: 3px solid rgba(244, 185, 66, 0.72);
+    outline-offset: 3px;
+}
+
+.amsa-table-wrap {
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
+.amsa-table {
+    min-width: 680px;
+}
+
+.amsa-table th,
+.amsa-table td {
+    vertical-align: middle;
+}
+
+.amsa-form-group label,
+label.form-label {
+    color: var(--amsa-color-text);
+    font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+    .amsa-page-header {
+        margin-bottom: var(--amsa-space-5);
+    }
+
+    .amsa-empty-state {
+        padding: var(--amsa-space-5) var(--amsa-space-4);
+    }
+
+    .amsa-table {
+        min-width: 620px;
+    }
+
+    .amsa-btn,
+    .btn {
+        min-height: 44px;
+    }
+}

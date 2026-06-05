@@ -7,13 +7,13 @@ $events = getAllEvents();
 
 <head>
     <meta charset="utf-8">
-    <title>AMSA - Community Engagements</title>
+    <title>AMSA AIU | Community Engagement</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Free HTML Templates" name="keywords">
-    <meta content="Free HTML Templates" name="description">
+    <meta content="Discover AMSA AIU community engagement events and student service activities." name="description">
 
     <!-- Favicon -->
-    <link href="img/logo.png" rel="icon">
+    <link href="img/logo.png" rel="icon" type="image/png">
+    <link href="img/logo.png" rel="apple-touch-icon">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,7 +68,7 @@ $events = getAllEvents();
             background: linear-gradient(135deg, var(--primary), #8B3A3A) !important;
         }
         .section-title::before {
-            background: linear-gradient(90deg, var(--primary), #8B3A3A) !important;
+            background: linear-gradient(90deg, #f4b942, #c99220) !important;
         }
         
         /* Aesthetic Modal Styles */
@@ -218,18 +218,15 @@ $events = getAllEvents();
         <div class="row gx-0">
             <div class="col-lg-8 text-center text-lg-start mb-2 mb-lg-0">
                 <div class="d-inline-flex align-items-center" style="height: 45px;">
-                    <small class="me-3 text-light"><i class="fa fa-map-marker-alt me-2"></i>Jln Tun Razak, Bandar Alor Setar, 05200 Alor Setar, Kedah, Malaysia</small>
-                    <small class="me-3 text-light"><i class="fa fa-phone-alt me-2"></i>+012 345 6789</small>
-                    <small class="text-light"><i class="fa fa-envelope-open me-2"></i>amsa@gmail.com</small>
+                    <small class="me-3 text-light"><i class="fa fa-map-marker-alt me-2"></i>Albukhary International University</small>
+                    <small class="text-light"><i class="fa fa-envelope-open me-2"></i><a class="text-light" href="mailto:amsa@student.aiu.edu.my">amsa@student.aiu.edu.my</a></small>
                 </div>
             </div>
             <div class="col-lg-4 text-center text-lg-end">
                 <div class="d-inline-flex align-items-center" style="height: 45px;">
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-twitter fw-normal"></i></a>
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-facebook-f fw-normal"></i></a>
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-linkedin-in fw-normal"></i></a>
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-instagram fw-normal"></i></a>
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle" href=""><i class="fab fa-youtube fw-normal"></i></a>
+                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="https://www.facebook.com/amsa.aiu/about/?locale=ms_MY&_rdr" target="_blank" rel="noopener" aria-label="AMSA Facebook"><i class="fab fa-facebook-f fw-normal"></i></a>
+                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="https://my.linkedin.com/company/amsa-aiu-myanmar-student-association" target="_blank" rel="noopener" aria-label="AMSA LinkedIn"><i class="fab fa-linkedin-in fw-normal"></i></a>
+                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle" href="https://www.instagram.com/amsa_aiu/" target="_blank" rel="noopener" aria-label="AMSA Instagram"><i class="fab fa-instagram fw-normal"></i></a>
                 </div>
             </div>
         </div>
@@ -240,7 +237,7 @@ $events = getAllEvents();
     <div class="container-fluid position-relative p-0">
         <nav class="navbar navbar-expand-lg navbar-dark px-5 py-3 py-lg-0">
             <a href="index.html" class="navbar-brand p-0">
-              <img src="img/logo.png" alt="AMSA" class="navbar-logo" style="height: 60px;">
+              <img src="img/logo.png" alt="AMSA" class="navbar-logo">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span class="fa fa-bars"></span>
@@ -248,12 +245,12 @@ $events = getAllEvents();
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <div class="navbar-nav ms-auto py-0">
                     <a href="index.html" class="nav-item nav-link">Home</a>
-                    <a href="events.html" class="nav-item nav-link">Events & News</a>
+                    <a href="events.php" class="nav-item nav-link">Events & News</a>
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">About</a>
                         <div class="dropdown-menu m-0">
                             <a href="about.html" class="dropdown-item">About Us</a>
-                            <a href="achievements.html" class="dropdown-item">Achievements</a>
+                            <a href="achievements.php" class="dropdown-item">Achievements</a>
                             <a href="committee.html" class="dropdown-item">Top Management</a>
                         </div>
                     </div>
@@ -261,24 +258,25 @@ $events = getAllEvents();
                         <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Projects</a>
                         <div class="dropdown-menu m-0">
                             <a href="cme.php" class="dropdown-item active">Community Engagements</a>
-                            <a href="fundrasing.html" class="dropdown-item">Fundrasing</a>
+                            <a href="fundraising.php" class="dropdown-item">Fundraising</a>
                         </div>
                     </div>
                     <a href="contact.html" class="nav-item nav-link">Contact</a>
                     <a href="devteam.html" class="nav-item nav-link">Dev Team</a>
                 </div>
-                <a href="#" class="btn btn-primary py-2 px-4 ms-3">Register</a>
+                <a href="point/register.php" class="btn btn-primary amsa-btn amsa-btn-primary py-2 px-4 ms-3">Register</a>
             </div>
         </nav>
     </div>
     <!-- Navbar End -->
 
     <!-- Page Header Start -->
-    <div class="container-fluid bg-header py-5 mb-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container-fluid bg-header amsa-page-header hero-cme py-5 mb-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
             <div class="row justify-content-center">
                 <div class="col-lg-8 text-center">
                     <h1 class="display-1 text-white mb-3 animated slideInDown">Community Engagements</h1>
+                    <p class="amsa-page-subtitle animated fadeInUp">Programs, outreach activities, and community initiatives led by AMSA students.</p>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb justify-content-center mb-0 animated slideInDown">
                             <li class="breadcrumb-item"><a class="text-white" href="index.html">Home</a></li>
@@ -301,7 +299,7 @@ $events = getAllEvents();
             </div>
             
             <?php if (empty($events)): ?>
-                <div class="no-events">
+                <div class="no-events amsa-empty-state">
                     <i class="fas fa-hand-holding-heart"></i>
                     <h3>No Events Found</h3>
                     <p>Check back soon for our upcoming community engagement programs!</p>
@@ -311,23 +309,28 @@ $events = getAllEvents();
                     <?php foreach ($events as $index => $event): ?>
                     <!-- Event Card <?php echo $event['id']; ?> -->
                     <div class="col-lg-4 col-md-6 wow slideInUp" data-wow-delay="<?php echo 0.2 + ($index * 0.1); ?>s">
-                        <div class="blog-item bg-light rounded overflow-hidden h-100 d-flex flex-column">
+                        <div class="blog-item bg-light rounded overflow-hidden h-100 d-flex flex-column amsa-card">
                             <div class="blog-img position-relative overflow-hidden">
                                 <?php 
                                 $images = getEventImages($event['id']);
-                                $firstImage = !empty($images) ? 'uploads/' . $images[0]['img_name'] : 'https://picsum.photos/id/48/800/500';
+                                $firstImage = !empty($images) ? 'uploads/' . basename($images[0]['img_name']) : 'https://picsum.photos/id/48/800/500';
                                 ?>
-                                <img class="img-fluid w-100" src="<?php echo $firstImage; ?>" alt="<?php echo htmlspecialchars($event['title']); ?>">
+                                <?php if (!empty($images)): ?>
+                                    <div class="content-gallery gallery-count-<?php echo min(count($images), 3); ?>">
+                                        <?php foreach (array_slice($images, 0, 3) as $cardImage): ?>
+                                            <a href="#" data-bs-toggle="modal" data-bs-target="#eventModal<?php echo (int) $event['id']; ?>">
+                                                <img src="uploads/<?php echo htmlspecialchars(basename($cardImage['img_name'])); ?>" alt="<?php echo htmlspecialchars($event['title']); ?>">
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <img class="img-fluid w-100" src="<?php echo $firstImage; ?>" alt="<?php echo htmlspecialchars($event['title']); ?>">
+                                <?php endif; ?>
                                 <div class="position-absolute top-0 start-0 bg-primary text-white rounded-end mt-3 py-2 px-3">
                                     <small><i class="fas fa-calendar-alt me-1"></i> <?php echo date('M d, Y', strtotime($event['upload_date'])); ?></small>
                                 </div>
                             </div>
                             <div class="p-4 flex-grow-1">
-                                <div class="d-flex mb-3">
-                                    <small class="text-muted">
-                                        <i class="far fa-user text-primary me-2"></i>Posted by: <?php echo htmlspecialchars($event['author_name'] ?? 'Admin'); ?>
-                                    </small>
-                                </div>
                                 <h4 class="mb-3"><?php echo htmlspecialchars($event['title']); ?></h4>
                                 <p class="mb-0"><?php echo substr(strip_tags(htmlspecialchars_decode($event['content'])), 0, 120) . '...'; ?></p>
                             </div>
@@ -352,29 +355,12 @@ $events = getAllEvents();
                                     $modalImages = getEventImages($event['id']);
                                     if (!empty($modalImages)): 
                                     ?>
-                                        <div id="carousel<?php echo $event['id']; ?>" class="carousel slide mb-4" data-bs-ride="carousel">
-                                            <div class="carousel-indicators">
-                                                <?php foreach ($modalImages as $idx => $img): ?>
-                                                <button type="button" data-bs-target="#carousel<?php echo $event['id']; ?>" data-bs-slide-to="<?php echo $idx; ?>" class="<?php echo $idx == 0 ? 'active' : ''; ?>"></button>
-                                                <?php endforeach; ?>
-                                            </div>
-                                            <div class="carousel-inner">
-                                                <?php foreach ($modalImages as $idx => $img): ?>
-                                                <div class="carousel-item <?php echo $idx == 0 ? 'active' : ''; ?>">
-                                                    <img src="uploads/<?php echo $img['img_name']; ?>" class="d-block w-100 rounded" alt="Event image <?php echo $idx + 1; ?>">
-                                                </div>
-                                                <?php endforeach; ?>
-                                            </div>
-                                            <?php if (count($modalImages) > 1): ?>
-                                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel<?php echo $event['id']; ?>" data-bs-slide="prev">
-                                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                                <span class="visually-hidden">Previous</span>
-                                            </button>
-                                            <button class="carousel-control-next" type="button" data-bs-target="#carousel<?php echo $event['id']; ?>" data-bs-slide="next">
-                                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                                <span class="visually-hidden">Next</span>
-                                            </button>
-                                            <?php endif; ?>
+                                        <div class="modal-gallery mb-4">
+                                            <?php foreach (array_slice($modalImages, 0, 3) as $idx => $img): ?>
+                                                <a href="uploads/<?php echo htmlspecialchars(basename($img['img_name'])); ?>" target="_blank" rel="noopener">
+                                                    <img src="uploads/<?php echo htmlspecialchars(basename($img['img_name'])); ?>" alt="Event image <?php echo $idx + 1; ?>">
+                                                </a>
+                                            <?php endforeach; ?>
                                         </div>
                                     <?php else: ?>
                                         <img src="https://picsum.photos/id/48/800/500" alt="Event Image" class="img-fluid rounded mb-4">
@@ -393,7 +379,6 @@ $events = getAllEvents();
                                         <div class="event-extra-details">
                                             <strong><i class="fas fa-info-circle me-2"></i>Event Details:</strong>
                                             <ul class="mt-2 mb-0">
-                                                <li><i class="fas fa-user me-2"></i>Organized by: <?php echo htmlspecialchars($event['author_name'] ?? 'AMSA Team'); ?></li>
                                                 <li><i class="fas fa-tag me-2"></i>Category: <?php echo ucfirst(str_replace('_', ' ', $event['category'])); ?></li>
                                                 <?php if ($event['edit_date']): ?>
                                                 <li><i class="fas fa-edit me-2"></i>Last edited: <?php echo date('F d, Y \a\t g:i A', strtotime($event['edit_date'])); ?></li>
@@ -404,7 +389,7 @@ $events = getAllEvents();
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <a href="#" class="btn btn-primary">Share This Event <i class="fas fa-share-alt ms-2"></i></a>
+                                    <a href="#" class="btn btn-primary amsa-btn amsa-btn-primary">Share This Event <i class="fas fa-share-alt ms-2"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -422,66 +407,45 @@ $events = getAllEvents();
                 <div class="col-lg-4 col-md-6 footer-about">
                     <div class="d-flex flex-column align-items-center justify-content-center text-center h-100 bg-primary p-4">
                         <a href="index.html" class="navbar-brand p-0">
-                            <img src="img/logo.png" alt="AMSA" style="height: 80px;">
+                            <img src="img/logo.png" alt="AMSA AIU" class="navbar-logo">
                         </a>
-                        <p class="mt-3 mb-4">We Rise by Lifting Others</p>
-                        <form action="">
-                            <div class="input-group">
-                                <input type="text" class="form-control border-white p-3" placeholder="Your Email">
-                                <button class="btn btn-dark">Sign Up</button>
-                            </div>
-                        </form>
+                        <p class="mt-3 mb-4">AMSA AIU supports Myanmar students at Albukhary International University through community, culture, leadership, and service.</p>
+                        <div class="d-flex">
+                            <a class="btn btn-primary btn-square me-2" href="https://www.facebook.com/amsa.aiu/about/?locale=ms_MY&_rdr" target="_blank" rel="noopener" aria-label="AMSA Facebook"><i class="fab fa-facebook-f fw-normal"></i></a>
+                            <a class="btn btn-primary btn-square me-2" href="https://my.linkedin.com/company/amsa-aiu-myanmar-student-association" target="_blank" rel="noopener" aria-label="AMSA LinkedIn"><i class="fab fa-linkedin-in fw-normal"></i></a>
+                            <a class="btn btn-primary btn-square" href="https://www.instagram.com/amsa_aiu/" target="_blank" rel="noopener" aria-label="AMSA Instagram"><i class="fab fa-instagram fw-normal"></i></a>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-6">
                     <div class="row gx-5">
                         <div class="col-lg-4 col-md-12 pt-5 mb-5">
                             <div class="section-title section-title-sm position-relative pb-3 mb-4">
-                                <h3 class="text-light mb-0">Get In Touch</h3>
+                                <h3 class="text-light mb-0">Contact</h3>
                             </div>
-                            <div class="d-flex mb-2">
-                                <i class="bi bi-geo-alt text-primary me-2"></i>
-                                <p class="mb-0">Jln Tun Razak, Bandar Alor Setar, 05200 Alor Setar, Kedah, Malaysia</p>
+                            <div class="d-flex mb-2"><i class="bi bi-geo-alt text-primary me-2"></i><p class="mb-0">Albukhary International University</p></div>
+                            <div class="d-flex mb-2"><i class="bi bi-envelope-open text-primary me-2"></i><p class="mb-0"><a class="text-light" href="mailto:amsa@student.aiu.edu.my">amsa@student.aiu.edu.my</a></p></div>
+                        </div>
+                        <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
+                            <div class="section-title section-title-sm position-relative pb-3 mb-4">
+                                <h3 class="text-light mb-0">AMSA</h3>
                             </div>
-                            <div class="d-flex mb-2">
-                                <i class="bi bi-envelope-open text-primary me-2"></i>
-                                <p class="mb-0">amsa@gmail.com</p>
-                            </div>
-                            <div class="d-flex mb-2">
-                                <i class="bi bi-telephone text-primary me-2"></i>
-                                <p class="mb-0">+012 345 67890</p>
-                            </div>
-                            <div class="d-flex mt-4">
-                                <a class="btn btn-primary btn-square me-2" href="#"><i class="fab fa-twitter fw-normal"></i></a>
-                                <a class="btn btn-primary btn-square me-2" href="#"><i class="fab fa-facebook-f fw-normal"></i></a>
-                                <a class="btn btn-primary btn-square me-2" href="#"><i class="fab fa-linkedin-in fw-normal"></i></a>
-                                <a class="btn btn-primary btn-square" href="#"><i class="fab fa-instagram fw-normal"></i></a>
+                            <div class="link-animated d-flex flex-column justify-content-start">
+                                <a class="text-light mb-2" href="index.html"><i class="bi bi-arrow-right text-primary me-2"></i>Home</a>
+                                <a class="text-light mb-2" href="about.html"><i class="bi bi-arrow-right text-primary me-2"></i>About AMSA</a>
+                                <a class="text-light mb-2" href="committee.html"><i class="bi bi-arrow-right text-primary me-2"></i>Committee</a>
+                                <a class="text-light" href="contact.html"><i class="bi bi-arrow-right text-primary me-2"></i>Contact</a>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
                             <div class="section-title section-title-sm position-relative pb-3 mb-4">
-                                <h3 class="text-light mb-0">Quick Links</h3>
+                                <h3 class="text-light mb-0">Programs</h3>
                             </div>
                             <div class="link-animated d-flex flex-column justify-content-start">
-                                <a class="text-light mb-2" href="index.html"><i class="bi bi-arrow-right text-primary me-2"></i>Home</a>
-                                <a class="text-light mb-2" href="about.html"><i class="bi bi-arrow-right text-primary me-2"></i>About Us</a>
-                                <a class="text-light mb-2" href="#"><i class="bi bi-arrow-right text-primary me-2"></i>Our Services</a>
-                                <a class="text-light mb-2" href="committee.html"><i class="bi bi-arrow-right text-primary me-2"></i>Meet The Team</a>
-                                <a class="text-light mb-2" href="events.html"><i class="bi bi-arrow-right text-primary me-2"></i>Latest Blog</a>
-                                <a class="text-light" href="contact.html"><i class="bi bi-arrow-right text-primary me-2"></i>Contact Us</a>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
-                            <div class="section-title section-title-sm position-relative pb-3 mb-4">
-                                <h3 class="text-light mb-0">Popular Links</h3>
-                            </div>
-                            <div class="link-animated d-flex flex-column justify-content-start">
-                                <a class="text-light mb-2" href="index.html"><i class="bi bi-arrow-right text-primary me-2"></i>Home</a>
-                                <a class="text-light mb-2" href="about.html"><i class="bi bi-arrow-right text-primary me-2"></i>About Us</a>
-                                <a class="text-light mb-2" href="cme.php"><i class="bi bi-arrow-right text-primary me-2"></i>Community Engagements</a>
-                                <a class="text-light mb-2" href="fundrasing.html"><i class="bi bi-arrow-right text-primary me-2"></i>Fundraising</a>
-                                <a class="text-light mb-2" href="achievements.html"><i class="bi bi-arrow-right text-primary me-2"></i>Achievements</a>
-                                <a class="text-light" href="devteam.html"><i class="bi bi-arrow-right text-primary me-2"></i>Dev Team</a>
+                                <a class="text-light mb-2" href="events.php"><i class="bi bi-arrow-right text-primary me-2"></i>Events & News</a>
+                                <a class="text-light mb-2" href="achievements.php"><i class="bi bi-arrow-right text-primary me-2"></i>Achievements</a>
+                                <a class="text-light mb-2" href="cme.php"><i class="bi bi-arrow-right text-primary me-2"></i>Community Engagement</a>
+                                <a class="text-light" href="fundraising.php"><i class="bi bi-arrow-right text-primary me-2"></i>Fundraising</a>
                             </div>
                         </div>
                     </div>
@@ -489,12 +453,12 @@ $events = getAllEvents();
             </div>
         </div>
     </div>
-    <div class="container-fluid text-white" style="background: #2c0410;">
+    <div class="container-fluid text-white" style="background: #061429;">
         <div class="container text-center">
             <div class="row justify-content-end">
                 <div class="col-lg-8 col-md-6">
                     <div class="d-flex align-items-center justify-content-center" style="height: 75px;">
-                        <p class="mb-0">&copy; <a class="text-white border-bottom" href="#">AIU Myanmar Student's Association</a>. All Rights Reserved.</p>
+                        <p class="mb-0">&copy; <a class="text-white border-bottom" href="index.html">AMSA AIU</a>. All Rights Reserved.</p>
                     </div>
                 </div>
             </div>

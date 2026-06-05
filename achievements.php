@@ -8,13 +8,13 @@ $testimonials = getAllTestimonials();
 
 <head>
     <meta charset="utf-8">
-    <title>AMSA - Achievements</title>
+    <title>AMSA AIU | Achievements</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Free HTML Templates" name="keywords">
-    <meta content="Free HTML Templates" name="description">
+    <meta content="Explore AMSA AIU achievements and student community milestones." name="description">
 
     <!-- Favicon -->
-    <link href="img/logo.png" rel="icon">
+    <link href="img/logo.png" rel="icon" type="image/png">
+    <link href="img/logo.png" rel="apple-touch-icon">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -279,18 +279,15 @@ $testimonials = getAllTestimonials();
         <div class="row gx-0">
             <div class="col-lg-8 text-center text-lg-start mb-2 mb-lg-0">
                 <div class="d-inline-flex align-items-center" style="height: 45px;">
-                    <small class="me-3 text-light"><i class="fa fa-map-marker-alt me-2"></i>Jln Tun Razak, Bandar Alor Setar, 05200 Alor Setar, Kedah, Malaysia</small>
-                    <small class="me-3 text-light"><i class="fa fa-phone-alt me-2"></i>+012 345 6789</small>
-                    <small class="text-light"><i class="fa fa-envelope-open me-2"></i>amsa@gmail.com</small>
+                    <small class="me-3 text-light"><i class="fa fa-map-marker-alt me-2"></i>Albukhary International University</small>
+                    <small class="text-light"><i class="fa fa-envelope-open me-2"></i><a class="text-light" href="mailto:amsa@student.aiu.edu.my">amsa@student.aiu.edu.my</a></small>
                 </div>
             </div>
             <div class="col-lg-4 text-center text-lg-end">
                 <div class="d-inline-flex align-items-center" style="height: 45px;">
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-twitter fw-normal"></i></a>
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-facebook-f fw-normal"></i></a>
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-linkedin-in fw-normal"></i></a>
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href=""><i class="fab fa-instagram fw-normal"></i></a>
-                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle" href=""><i class="fab fa-youtube fw-normal"></i></a>
+                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="https://www.facebook.com/amsa.aiu/about/?locale=ms_MY&_rdr" target="_blank" rel="noopener" aria-label="AMSA Facebook"><i class="fab fa-facebook-f fw-normal"></i></a>
+                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle me-2" href="https://my.linkedin.com/company/amsa-aiu-myanmar-student-association" target="_blank" rel="noopener" aria-label="AMSA LinkedIn"><i class="fab fa-linkedin-in fw-normal"></i></a>
+                    <a class="btn btn-sm btn-outline-light btn-sm-square rounded-circle" href="https://www.instagram.com/amsa_aiu/" target="_blank" rel="noopener" aria-label="AMSA Instagram"><i class="fab fa-instagram fw-normal"></i></a>
                 </div>
             </div>
         </div>
@@ -301,7 +298,7 @@ $testimonials = getAllTestimonials();
     <div class="container-fluid position-relative p-0">
         <nav class="navbar navbar-expand-lg navbar-dark px-5 py-3 py-lg-0">
             <a href="index.html" class="navbar-brand p-0">
-                <img src="img/logo.png" alt="AMSA" class="navbar-logo" style="height: 60px;">
+                <img src="img/logo.png" alt="AMSA" class="navbar-logo">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span class="fa fa-bars"></span>
@@ -309,7 +306,7 @@ $testimonials = getAllTestimonials();
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <div class="navbar-nav ms-auto py-0">
                     <a href="index.html" class="nav-item nav-link">Home</a>
-                    <a href="events.html" class="nav-item nav-link">Events & News</a>
+                    <a href="events.php" class="nav-item nav-link">Events & News</a>
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">About</a>
                         <div class="dropdown-menu m-0">
@@ -322,20 +319,21 @@ $testimonials = getAllTestimonials();
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Projects</a>
                         <div class="dropdown-menu m-0">
                             <a href="cme.php" class="dropdown-item">Community Engagements</a>
-                            <a href="fundrasing.html" class="dropdown-item">Fundrasing</a>
+                            <a href="fundraising.php" class="dropdown-item">Fundraising</a>
                         </div>
                     </div>
                     <a href="contact.html" class="nav-item nav-link">Contact</a>
                     <a href="devteam.html" class="nav-item nav-link">Dev Team</a>
                 </div>
-                <a href="#" class="btn btn-primary py-2 px-4 ms-3">Register</a>
+                <a href="point/register.php" class="btn btn-primary amsa-btn amsa-btn-primary py-2 px-4 ms-3">Register</a>
             </div>
         </nav>
 
         <!-- HERO SECTION -->
-        <div class="container-fluid bg-primary py-5 bg-header d-flex align-items-center" style="min-height: 650px; margin-bottom: 90px;">
+        <div class="container-fluid bg-primary py-5 bg-header amsa-page-header hero-achievements d-flex align-items-center" style="min-height: 650px; margin-bottom: 90px;">
             <div class="container text-center">
                 <h1 class="display-4 text-white animated zoomIn mb-3">Our Achievements</h1>
+                <p class="amsa-page-subtitle animated fadeInUp">Celebrating AMSA milestones, service outcomes, and the people who helped make them possible.</p>
                 
                 <!-- Breadcrumb -->
                 <div class="d-flex justify-content-center align-items-center">
@@ -426,7 +424,7 @@ $testimonials = getAllTestimonials();
             </div>
             
             <?php if (empty($achievements)): ?>
-                <div class="no-data">
+                <div class="no-data amsa-empty-state">
                     <i class="fas fa-trophy"></i>
                     <h3>No Achievements Yet</h3>
                     <p>Check back soon for our latest achievements and awards!</p>
@@ -435,13 +433,23 @@ $testimonials = getAllTestimonials();
                 <div class="row g-4">
                     <?php foreach ($achievements as $index => $achievement): ?>
                     <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="<?php echo 0.1 + ($index * 0.2); ?>s">
-                        <div class="achievement-card">
+                        <div class="achievement-card amsa-card">
                             <div class="position-relative">
                                 <?php 
                                 $achievementImages = getEventImages($achievement['id']);
-                                $achievementImage = !empty($achievementImages) ? 'uploads/' . $achievementImages[0]['img_name'] : 'https://picsum.photos/id/48/800/500';
+                                $achievementImage = !empty($achievementImages) ? 'uploads/' . basename($achievementImages[0]['img_name']) : 'https://picsum.photos/id/48/800/500';
                                 ?>
-                                <img class="img-fluid" src="<?php echo $achievementImage; ?>" alt="<?php echo htmlspecialchars($achievement['title']); ?>">
+                                <?php if (!empty($achievementImages)): ?>
+                                    <div class="content-gallery gallery-count-<?php echo min(count($achievementImages), 3); ?>">
+                                        <?php foreach (array_slice($achievementImages, 0, 3) as $cardImage): ?>
+                                            <a href="#" data-bs-toggle="modal" data-bs-target="#achievementModal<?php echo (int) $achievement['id']; ?>">
+                                                <img src="uploads/<?php echo htmlspecialchars(basename($cardImage['img_name'])); ?>" alt="<?php echo htmlspecialchars($achievement['title']); ?>">
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <img class="img-fluid" src="<?php echo $achievementImage; ?>" alt="<?php echo htmlspecialchars($achievement['title']); ?>">
+                                <?php endif; ?>
                                 <div class="achievement-badge"><?php echo date('Y', strtotime($achievement['upload_date'])); ?></div>
                             </div>
                             <div class="p-4">
@@ -471,17 +479,18 @@ $testimonials = getAllTestimonials();
                                 </div>
                                 <div class="modal-body">
                                     <?php if (!empty($achievementImages)): ?>
-                                        <img src="<?php echo $achievementImage; ?>" class="img-fluid rounded mb-4" style="width: 100%;">
+                                        <div class="modal-gallery mb-4">
+                                            <?php foreach (array_slice($achievementImages, 0, 3) as $idx => $modalImage): ?>
+                                                <a href="uploads/<?php echo htmlspecialchars(basename($modalImage['img_name'])); ?>" target="_blank" rel="noopener">
+                                                    <img src="uploads/<?php echo htmlspecialchars(basename($modalImage['img_name'])); ?>" alt="Achievement image <?php echo $idx + 1; ?>">
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
                                     <?php endif; ?>
                                     <div class="mb-3">
                                         <span class="badge bg-primary"><?php echo date('F d, Y', strtotime($achievement['upload_date'])); ?></span>
                                     </div>
                                     <p><?php echo nl2br(htmlspecialchars($achievement['content'])); ?></p>
-                                    <?php if ($achievement['author_name']): ?>
-                                        <div class="alert alert-light mt-3">
-                                            <i class="fas fa-user me-2"></i> Posted by: <?php echo htmlspecialchars($achievement['author_name']); ?>
-                                        </div>
-                                    <?php endif; ?>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -566,7 +575,7 @@ $testimonials = getAllTestimonials();
             </div>
             
             <?php if (empty($testimonials)): ?>
-                <div class="no-data">
+                <div class="no-data amsa-empty-state">
                     <i class="fas fa-comments"></i>
                     <h3>No Testimonials Yet</h3>
                     <p>Be the first to share your experience with AMSA!</p>
@@ -576,9 +585,9 @@ $testimonials = getAllTestimonials();
                     <?php foreach ($testimonials as $testimonial): ?>
                     <?php 
                     $testimonialImages = getEventImages($testimonial['id']);
-                    $testimonialImage = !empty($testimonialImages) ? 'uploads/' . $testimonialImages[0]['img_name'] : 'img/default-avatar.jpg';
+                    $testimonialImage = !empty($testimonialImages) ? 'uploads/' . $testimonialImages[0]['img_name'] : 'img/user.jpg';
                     ?>
-                    <div class="testimonial-item">
+                    <div class="testimonial-item amsa-card">
                         <div class="testimonial-img">
                             <img class="img-fluid" src="<?php echo $testimonialImage; ?>" alt="<?php echo htmlspecialchars($testimonial['title']); ?>">
                             <div class="quote-icon">
@@ -596,7 +605,7 @@ $testimonials = getAllTestimonials();
                             "<?php echo htmlspecialchars($testimonial['content']); ?>"
                         </div>
                         <h5 class="testimonial-name"><?php echo htmlspecialchars($testimonial['title']); ?></h5>
-                        <p class="testimonial-position"><?php echo htmlspecialchars($testimonial['author_name'] ?? 'AMSA Member'); ?></p>
+                        <p class="testimonial-position">AMSA Community</p>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -613,12 +622,12 @@ $testimonials = getAllTestimonials();
                     <h1 class="mb-4">View Our Top Management</h1>
                     <p class="mb-4">Meet the dedicated individuals who lead AMSA and drive our mission forward.</p>
                     <div class="d-flex align-items-center">
-                        <a href="committee.html" class="btn btn-primary py-3 px-5 me-3">Top Management</a>
-                        <a href="contact.html" class="btn btn-outline-primary py-3 px-5">Contact Us</a>
+                        <a href="committee.html" class="btn btn-primary amsa-btn amsa-btn-primary py-3 px-5 me-3">Top Management</a>
+                        <a href="contact.html" class="btn btn-outline-primary amsa-btn amsa-btn-ghost py-3 px-5">Contact Us</a>
                     </div>
                 </div>
                 <div class="col-lg-4">
-                    <img src="img/cta-achievements.png" class="img-fluid rounded" alt="">
+                    <img src="img/aboutus.jpg" class="img-fluid rounded" alt="AMSA AIU student community">
                 </div>
             </div>
         </div>
@@ -632,66 +641,45 @@ $testimonials = getAllTestimonials();
                 <div class="col-lg-4 col-md-6 footer-about">
                     <div class="d-flex flex-column align-items-center justify-content-center text-center h-100 bg-primary p-4">
                         <a href="index.html" class="navbar-brand p-0">
-                            <img src="img/logo.png" alt="AMSA" style="height: 80px;">
+                            <img src="img/logo.png" alt="AMSA AIU" class="navbar-logo">
                         </a>
-                        <p class="mt-3 mb-4">We Rise by Lifting Others</p>
-                        <form action="">
-                            <div class="input-group">
-                                <input type="text" class="form-control border-white p-3" placeholder="Your Email">
-                                <button class="btn btn-dark">Sign Up</button>
-                            </div>
-                        </form>
+                        <p class="mt-3 mb-4">AMSA AIU supports Myanmar students at Albukhary International University through community, culture, leadership, and service.</p>
+                        <div class="d-flex">
+                            <a class="btn btn-primary btn-square me-2" href="https://www.facebook.com/amsa.aiu/about/?locale=ms_MY&_rdr" target="_blank" rel="noopener" aria-label="AMSA Facebook"><i class="fab fa-facebook-f fw-normal"></i></a>
+                            <a class="btn btn-primary btn-square me-2" href="https://my.linkedin.com/company/amsa-aiu-myanmar-student-association" target="_blank" rel="noopener" aria-label="AMSA LinkedIn"><i class="fab fa-linkedin-in fw-normal"></i></a>
+                            <a class="btn btn-primary btn-square" href="https://www.instagram.com/amsa_aiu/" target="_blank" rel="noopener" aria-label="AMSA Instagram"><i class="fab fa-instagram fw-normal"></i></a>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-6">
                     <div class="row gx-5">
                         <div class="col-lg-4 col-md-12 pt-5 mb-5">
                             <div class="section-title section-title-sm position-relative pb-3 mb-4">
-                                <h3 class="text-light mb-0">Get In Touch</h3>
+                                <h3 class="text-light mb-0">Contact</h3>
                             </div>
-                            <div class="d-flex mb-2">
-                                <i class="bi bi-geo-alt text-primary me-2"></i>
-                                <p class="mb-0">Jln Tun Razak, Bandar Alor Setar, 05200 Alor Setar, Kedah, Malaysia</p>
+                            <div class="d-flex mb-2"><i class="bi bi-geo-alt text-primary me-2"></i><p class="mb-0">Albukhary International University</p></div>
+                            <div class="d-flex mb-2"><i class="bi bi-envelope-open text-primary me-2"></i><p class="mb-0"><a class="text-light" href="mailto:amsa@student.aiu.edu.my">amsa@student.aiu.edu.my</a></p></div>
+                        </div>
+                        <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
+                            <div class="section-title section-title-sm position-relative pb-3 mb-4">
+                                <h3 class="text-light mb-0">AMSA</h3>
                             </div>
-                            <div class="d-flex mb-2">
-                                <i class="bi bi-envelope-open text-primary me-2"></i>
-                                <p class="mb-0">amsa@gmail.com</p>
-                            </div>
-                            <div class="d-flex mb-2">
-                                <i class="bi bi-telephone text-primary me-2"></i>
-                                <p class="mb-0">+012 345 67890</p>
-                            </div>
-                            <div class="d-flex mt-4">
-                                <a class="btn btn-primary btn-square me-2" href="#"><i class="fab fa-twitter fw-normal"></i></a>
-                                <a class="btn btn-primary btn-square me-2" href="#"><i class="fab fa-facebook-f fw-normal"></i></a>
-                                <a class="btn btn-primary btn-square me-2" href="#"><i class="fab fa-linkedin-in fw-normal"></i></a>
-                                <a class="btn btn-primary btn-square" href="#"><i class="fab fa-instagram fw-normal"></i></a>
+                            <div class="link-animated d-flex flex-column justify-content-start">
+                                <a class="text-light mb-2" href="index.html"><i class="bi bi-arrow-right text-primary me-2"></i>Home</a>
+                                <a class="text-light mb-2" href="about.html"><i class="bi bi-arrow-right text-primary me-2"></i>About AMSA</a>
+                                <a class="text-light mb-2" href="committee.html"><i class="bi bi-arrow-right text-primary me-2"></i>Committee</a>
+                                <a class="text-light" href="contact.html"><i class="bi bi-arrow-right text-primary me-2"></i>Contact</a>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
                             <div class="section-title section-title-sm position-relative pb-3 mb-4">
-                                <h3 class="text-light mb-0">Quick Links</h3>
+                                <h3 class="text-light mb-0">Programs</h3>
                             </div>
                             <div class="link-animated d-flex flex-column justify-content-start">
-                                <a class="text-light mb-2" href="index.html"><i class="bi bi-arrow-right text-primary me-2"></i>Home</a>
-                                <a class="text-light mb-2" href="about.html"><i class="bi bi-arrow-right text-primary me-2"></i>About Us</a>
-                                <a class="text-light mb-2" href="cme.php"><i class="bi bi-arrow-right text-primary me-2"></i>Community Engagements</a>
-                                <a class="text-light mb-2" href="committee.html"><i class="bi bi-arrow-right text-primary me-2"></i>Meet The Team</a>
-                                <a class="text-light mb-2" href="events.html"><i class="bi bi-arrow-right text-primary me-2"></i>Latest Blog</a>
-                                <a class="text-light" href="contact.html"><i class="bi bi-arrow-right text-primary me-2"></i>Contact Us</a>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-12 pt-0 pt-lg-5 mb-5">
-                            <div class="section-title section-title-sm position-relative pb-3 mb-4">
-                                <h3 class="text-light mb-0">Popular Links</h3>
-                            </div>
-                            <div class="link-animated d-flex flex-column justify-content-start">
-                                <a class="text-light mb-2" href="index.html"><i class="bi bi-arrow-right text-primary me-2"></i>Home</a>
-                                <a class="text-light mb-2" href="about.html"><i class="bi bi-arrow-right text-primary me-2"></i>About Us</a>
+                                <a class="text-light mb-2" href="events.php"><i class="bi bi-arrow-right text-primary me-2"></i>Events & News</a>
                                 <a class="text-light mb-2" href="achievements.php"><i class="bi bi-arrow-right text-primary me-2"></i>Achievements</a>
-                                <a class="text-light mb-2" href="fundrasing.html"><i class="bi bi-arrow-right text-primary me-2"></i>Fundraising</a>
-                                <a class="text-light mb-2" href="cme.php"><i class="bi bi-arrow-right text-primary me-2"></i>Community</a>
-                                <a class="text-light" href="devteam.html"><i class="bi bi-arrow-right text-primary me-2"></i>Dev Team</a>
+                                <a class="text-light mb-2" href="cme.php"><i class="bi bi-arrow-right text-primary me-2"></i>Community Engagement</a>
+                                <a class="text-light" href="fundraising.php"><i class="bi bi-arrow-right text-primary me-2"></i>Fundraising</a>
                             </div>
                         </div>
                     </div>
@@ -699,12 +687,12 @@ $testimonials = getAllTestimonials();
             </div>
         </div>
     </div>
-    <div class="container-fluid text-white" style="background: #2c0410;">
+    <div class="container-fluid text-white" style="background: #061429;">
         <div class="container text-center">
             <div class="row justify-content-end">
                 <div class="col-lg-8 col-md-6">
                     <div class="d-flex align-items-center justify-content-center" style="height: 75px;">
-                        <p class="mb-0">&copy; <a class="text-white border-bottom" href="#">AIU Myanmar Student's Association</a>. All Rights Reserved.</p>
+                        <p class="mb-0">&copy; <a class="text-white border-bottom" href="index.html">AMSA AIU</a>. All Rights Reserved.</p>
                     </div>
                 </div>
             </div>

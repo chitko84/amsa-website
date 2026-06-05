@@ -220,22 +220,22 @@
 
 <div class="sidebar">
     <div class="sidebar-header">
-        <img src="../img/logo.png" alt="AMSA Logo">
+        <img src="img/logo.png" alt="AMSA Logo">
         <h4>AMSA Admin</h4>
         <p>Community Engagement Manager</p>
     </div>
     <div class="sidebar-menu">
-        <a href="dashboard.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">
+        <a href="admin/dashboard.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">
             <i class="fas fa-tachometer-alt"></i> Dashboard
         </a>
-        <a href="add_event.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'add_event.php' ? 'active' : ''; ?>">
+        <a href="admin/add_event.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'add_event.php' ? 'active' : ''; ?>">
             <i class="fas fa-plus-circle"></i> Add New Event
         </a>
-        <a href="#" class="<?php echo basename($_SERVER['PHP_SELF']) == 'analytics.php' ? 'active' : ''; ?>">
-            <i class="fas fa-chart-line"></i> Analytics
+        <a href="admin/dashboard.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">
+            <i class="fas fa-chart-line"></i> Dashboard Analytics
         </a>
-        <a href="#" class="<?php echo basename($_SERVER['PHP_SELF']) == 'volunteers.php' ? 'active' : ''; ?>">
-            <i class="fas fa-users"></i> Volunteers
+        <a href="admin/members.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'members.php' ? 'active' : ''; ?>">
+            <i class="fas fa-users"></i> Members
         </a>
         
         <!-- Point Management Dropdown -->
@@ -245,22 +245,22 @@
                 <i class="fas fa-chevron-down dropdown-arrow"></i>
             </div>
             <div class="dropdown-items">
-                <a href="../point/point_categories_admin.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'point_categories_admin.php' ? 'active' : ''; ?>">
+                <a href="point/point_categories_admin.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'point_categories_admin.php' ? 'active' : ''; ?>">
                     <i class="fas fa-tags"></i> Manage Categories
                 </a>
-                <a href="../point/admin_points.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'admin_points.php' ? 'active' : ''; ?>">
+                <a href="point/admin_points.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'admin_points.php' ? 'active' : ''; ?>">
                     <i class="fas fa-clipboard-list"></i> Manage Requests
                 </a>
-                <a href="../point/point_request.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'point_request.php' ? 'active' : ''; ?>">
+                <a href="point/point_request.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'point_request.php' ? 'active' : ''; ?>">
                     <i class="fas fa-paper-plane"></i> Submit Request
                 </a>
-                <a href="../point/my_points.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'my_points.php' ? 'active' : ''; ?>">
+                <a href="point/my_points.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'my_points.php' ? 'active' : ''; ?>">
                     <i class="fas fa-chart-line"></i> My Points
                 </a>
             </div>
         </div>
         
-        <a href="logout.php">
+        <a href="admin/logout.php">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>
     </div>
