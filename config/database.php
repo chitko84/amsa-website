@@ -815,6 +815,111 @@ function getUserPointRequests($userId) {
     return $result->fetch_all(MYSQLI_ASSOC);
 }
 
+function getUserPointRequestsPaginated($userId, $status = 'all', $sort = 'newest', $page = 1, $perPage = 10) {
+    global $conn;
+
+    $allowedStatuses = ['all', 'pending', 'approved', 'rejected'];
+    $status = in_array($status, $allowedStatuses, true) ? $status : 'all';
+    $sortMap = [
+        'newest' => 'pr.request_date DESC, pr.id DESC',
+        'oldest' => 'pr.request_date ASC, pr.id ASC',
+        'points_desc' => 'pc.points DESC, pr.request_date DESC',
+        'points_asc' => 'pc.points ASC, pr.request_date DESC',
+    ];
+    $orderBy = $sortMap[$sort] ?? $sortMap['newest'];
+    $perPage = in_array((int) $perPage, [10, 25, 50], true) ? (int) $perPage : 10;
+    $page = max(1, (int) $page);
+    $offset = ($page - 1) * $perPage;
+
+    $where = 'WHERE pr.user_id = ?';
+    $types = 'i';
+    $params = [(int) $userId];
+    if ($status !== 'all') {
+        $where .= ' AND pr.status = ?';
+        $types .= 's';
+        $params[] = $status;
+    }
+
+    $countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM point_request pr JOIN point_category pc ON pr.point_category_id = pc.id $where");
+    $countStmt->bind_param($types, ...$params);
+    $countStmt->execute();
+    $totalCount = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+    $totalPages = max(1, (int) ceil($totalCount / $perPage));
+    if ($page > $totalPages) {
+        $page = $totalPages;
+        $offset = ($page - 1) * $perPage;
+    }
+
+    $stmt = $conn->prepare("
+        SELECT pr.*, pc.category_name, pc.points
+        FROM point_request pr
+        JOIN point_category pc ON pr.point_category_id = pc.id
+        $where
+        ORDER BY $orderBy
+        LIMIT ? OFFSET ?
+    ");
+    $queryTypes = $types . 'ii';
+    $queryParams = array_merge($params, [$perPage, $offset]);
+    $stmt->bind_param($queryTypes, ...$queryParams);
+    $stmt->execute();
+
+    return [
+        'requests' => $stmt->get_result()->fetch_all(MYSQLI_ASSOC),
+        'total_count' => $totalCount,
+        'current_page' => $page,
+        'total_pages' => $totalPages,
+        'per_page' => $perPage,
+    ];
+}
+
+function getPostsPaginated(array $categories, $page = 1, $perPage = 9) {
+    global $conn;
+
+    $allowedPerPage = [9, 18, 27];
+    $perPage = in_array((int) $perPage, $allowedPerPage, true) ? (int) $perPage : 9;
+    $page = max(1, (int) $page);
+    $offset = ($page - 1) * $perPage;
+    $categories = array_values(array_filter($categories, fn($category) => is_string($category) && $category !== ''));
+
+    if (empty($categories)) {
+        return ['posts' => [], 'total_count' => 0, 'current_page' => 1, 'total_pages' => 1, 'per_page' => $perPage];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($categories), '?'));
+    $types = str_repeat('s', count($categories));
+
+    $countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM post WHERE category IN ($placeholders)");
+    $countStmt->bind_param($types, ...$categories);
+    $countStmt->execute();
+    $totalCount = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+    $totalPages = max(1, (int) ceil($totalCount / $perPage));
+    if ($page > $totalPages) {
+        $page = $totalPages;
+        $offset = ($page - 1) * $perPage;
+    }
+
+    $stmt = $conn->prepare("
+        SELECT p.*, u.name as author_name
+        FROM post p
+        LEFT JOIN user u ON p.uploaded_by = u.id
+        WHERE p.category IN ($placeholders)
+        ORDER BY p.upload_date DESC, p.id DESC
+        LIMIT ? OFFSET ?
+    ");
+    $queryTypes = $types . 'ii';
+    $queryParams = array_merge($categories, [$perPage, $offset]);
+    $stmt->bind_param($queryTypes, ...$queryParams);
+    $stmt->execute();
+
+    return [
+        'posts' => $stmt->get_result()->fetch_all(MYSQLI_ASSOC),
+        'total_count' => $totalCount,
+        'current_page' => $page,
+        'total_pages' => $totalPages,
+        'per_page' => $perPage,
+    ];
+}
+
 function getAllPointRequests() {
     global $conn;
     ensureProfileImageColumn();
@@ -838,6 +943,82 @@ function getAllPointRequests() {
     $stmt->execute();
     $result = $stmt->get_result();
     return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+function getPointRequestsPaginated($status = 'all', $sort = 'newest', $page = 1, $perPage = 10) {
+    global $conn;
+    ensureProfileImageColumn();
+
+    $allowedStatuses = ['all', 'pending', 'approved', 'rejected'];
+    $status = in_array($status, $allowedStatuses, true) ? $status : 'all';
+
+    $sortMap = [
+        'newest' => 'pr.request_date DESC, pr.id DESC',
+        'oldest' => 'pr.request_date ASC, pr.id ASC',
+        'points_desc' => 'pc.points DESC, pr.request_date DESC',
+        'points_asc' => 'pc.points ASC, pr.request_date DESC',
+        'status' => "CASE pr.status WHEN 'pending' THEN 1 WHEN 'approved' THEN 2 WHEN 'rejected' THEN 3 ELSE 4 END, pr.request_date DESC",
+    ];
+    $orderBy = $sortMap[$sort] ?? $sortMap['newest'];
+
+    $perPageOptions = [10, 25, 50];
+    $perPage = in_array((int) $perPage, $perPageOptions, true) ? (int) $perPage : 10;
+    $page = max(1, (int) $page);
+    $offset = ($page - 1) * $perPage;
+
+    $where = '';
+    $types = '';
+    $params = [];
+    if ($status !== 'all') {
+        $where = 'WHERE pr.status = ?';
+        $types .= 's';
+        $params[] = $status;
+    }
+
+    $countSql = "
+        SELECT COUNT(*) AS total
+        FROM point_request pr
+        JOIN point_category pc ON pr.point_category_id = pc.id
+        JOIN user u ON pr.user_id = u.id
+        $where
+    ";
+    $countStmt = $conn->prepare($countSql);
+    if ($types !== '') {
+        $countStmt->bind_param($types, ...$params);
+    }
+    $countStmt->execute();
+    $totalCount = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+    $totalPages = max(1, (int) ceil($totalCount / $perPage));
+    if ($page > $totalPages) {
+        $page = $totalPages;
+        $offset = ($page - 1) * $perPage;
+    }
+
+    $sql = "
+        SELECT pr.*, pc.category_name, pc.points, u.name as user_name, u.email as user_email, u.role as user_role, u.profile_image as user_profile_image,
+               r.name as reviewer_name
+        FROM point_request pr
+        JOIN point_category pc ON pr.point_category_id = pc.id
+        JOIN user u ON pr.user_id = u.id
+        LEFT JOIN user r ON pr.reviewed_by = r.id
+        $where
+        ORDER BY $orderBy
+        LIMIT ? OFFSET ?
+    ";
+    $stmt = $conn->prepare($sql);
+    $queryTypes = $types . 'ii';
+    $queryParams = array_merge($params, [$perPage, $offset]);
+    $stmt->bind_param($queryTypes, ...$queryParams);
+    $stmt->execute();
+    $requests = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    return [
+        'requests' => $requests,
+        'total_count' => $totalCount,
+        'current_page' => $page,
+        'total_pages' => $totalPages,
+        'per_page' => $perPage,
+    ];
 }
 
 function getPointRequestById($requestId) {
@@ -1123,6 +1304,7 @@ function getLeaderboard($limit = 25) {
         WHERE u.role = 'member'
           AND u.status = 'active'
         GROUP BY u.id, u.name, u.email, u.profile_image, up.total_points
+        HAVING total_points > 0 OR approved_request_count > 0
         ORDER BY total_points DESC, approved_request_count DESC, latest_approved_activity_date DESC
         $limitClause
     ";

@@ -80,13 +80,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 ensureProfileImageColumn();
 
-$result = $conn->query("
+$memberSearch = trim($_GET['search'] ?? '');
+$roleFilter = normalizeRole($_GET['role'] ?? 'all');
+$statusFilter = $_GET['status'] ?? 'all';
+$page = max(1, (int) ($_GET['page'] ?? 1));
+$perPage = (int) ($_GET['per_page'] ?? 10);
+if (!in_array($perPage, [10, 25, 50], true)) {
+    $perPage = 10;
+}
+$allowedRoleFilters = array_merge(['all'], $roleOptions);
+$roleFilter = in_array($roleFilter, $allowedRoleFilters, true) ? $roleFilter : 'all';
+$statusFilter = in_array($statusFilter, ['all', 'active', 'inactive'], true) ? $statusFilter : 'all';
+$sortMap = [
+    'newest' => 'u.created_at DESC, u.id DESC',
+    'oldest' => 'u.created_at ASC, u.id ASC',
+    'name_asc' => 'u.name ASC, u.id ASC',
+    'name_desc' => 'u.name DESC, u.id DESC',
+    'role' => "FIELD(u.role, 'member', 'president', 'vice_president', 'secretary', 'male_treasurer', 'female_treasurer', 'system_admin', 'admin'), u.name ASC",
+    'status' => 'u.status ASC, u.name ASC',
+];
+$sortRaw = $_GET['sort'] ?? 'newest';
+$sortOption = array_key_exists($sortRaw, $sortMap) ? $sortRaw : 'newest';
+$orderBy = $sortMap[$sortOption] ?? $sortMap['newest'];
+$where = [];
+$types = '';
+$params = [];
+if ($memberSearch !== '') {
+    $where[] = '(u.name LIKE ? OR u.email LIKE ?)';
+    $types .= 'ss';
+    $searchLike = '%' . $memberSearch . '%';
+    $params[] = $searchLike;
+    $params[] = $searchLike;
+}
+if ($roleFilter !== 'all') {
+    $where[] = 'u.role = ?';
+    $types .= 's';
+    $params[] = $roleFilter;
+}
+if ($statusFilter !== 'all') {
+    $where[] = 'u.status = ?';
+    $types .= 's';
+    $params[] = $statusFilter;
+}
+$whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+$countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM user u $whereSql");
+if ($types !== '') {
+    $countStmt->bind_param($types, ...$params);
+}
+$countStmt->execute();
+$totalMembers = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+$totalPages = max(1, (int) ceil($totalMembers / $perPage));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $perPage;
+
+$stmt = $conn->prepare("
     SELECT u.id, u.name, u.email, u.role, u.status, u.created_at, u.profile_image, COALESCE(up.total_points, 0) AS total_points
     FROM user u
     LEFT JOIN user_points up ON up.user_id = u.id
-    ORDER BY FIELD(u.role, 'member', 'president', 'vice_president', 'secretary', 'male_treasurer', 'female_treasurer', 'system_admin', 'admin'), u.created_at DESC, u.name ASC
+    $whereSql
+    ORDER BY $orderBy
+    LIMIT ? OFFSET ?
 ");
-$members = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+$queryTypes = $types . 'ii';
+$queryParams = array_merge($params, [$perPage, $offset]);
+$stmt->bind_param($queryTypes, ...$queryParams);
+$stmt->execute();
+$members = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$showingStart = $totalMembers > 0 ? $offset + 1 : 0;
+$showingEnd = $totalMembers > 0 ? min($offset + count($members), $totalMembers) : 0;
+
+function membersPageUrl(array $overrides = []) {
+    global $memberSearch, $roleFilter, $statusFilter, $sortOption, $perPage, $page;
+
+    $params = array_merge([
+        'search' => $memberSearch,
+        'role' => $roleFilter,
+        'status' => $statusFilter,
+        'sort' => $sortOption,
+        'per_page' => $perPage,
+        'page' => $page,
+    ], $overrides);
+    return 'members.php?' . http_build_query($params);
+}
 
 $pageTitle = 'Members';
 include 'includes/header.php';
@@ -98,8 +175,16 @@ include 'includes/header.php';
 <div class="admin-card amsa-card p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">User Management</h4>
-        <span class="text-muted"><?php echo count($members); ?> users</span>
+        <span class="text-muted">Showing <?php echo (int) $showingStart; ?>&ndash;<?php echo (int) $showingEnd; ?> of <?php echo (int) $totalMembers; ?> users</span>
     </div>
+    <form method="GET" class="row g-3 mb-4">
+        <div class="col-md-3"><label class="form-label">Search</label><input type="search" name="search" class="form-control amsa-form-control" value="<?php echo htmlspecialchars($memberSearch); ?>" placeholder="Name or email"></div>
+        <div class="col-md-2"><label class="form-label">Role</label><select name="role" class="form-select amsa-form-control"><option value="all">All</option><?php foreach ($roleOptions as $roleOption): ?><option value="<?php echo htmlspecialchars($roleOption); ?>" <?php echo $roleFilter === $roleOption ? 'selected' : ''; ?>><?php echo htmlspecialchars(roleLabel($roleOption)); ?></option><?php endforeach; ?></select></div>
+        <div class="col-md-2"><label class="form-label">Status</label><select name="status" class="form-select amsa-form-control"><option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All</option><option value="active" <?php echo $statusFilter === 'active' ? 'selected' : ''; ?>>Active</option><option value="inactive" <?php echo $statusFilter === 'inactive' ? 'selected' : ''; ?>>Inactive</option></select></div>
+        <div class="col-md-2"><label class="form-label">Sort</label><select name="sort" class="form-select amsa-form-control"><option value="newest" <?php echo $sortOption === 'newest' ? 'selected' : ''; ?>>Newest First</option><option value="oldest" <?php echo $sortOption === 'oldest' ? 'selected' : ''; ?>>Oldest First</option><option value="name_asc" <?php echo $sortOption === 'name_asc' ? 'selected' : ''; ?>>Name A-Z</option><option value="name_desc" <?php echo $sortOption === 'name_desc' ? 'selected' : ''; ?>>Name Z-A</option><option value="role" <?php echo $sortOption === 'role' ? 'selected' : ''; ?>>Role</option><option value="status" <?php echo $sortOption === 'status' ? 'selected' : ''; ?>>Status</option></select></div>
+        <div class="col-md-1"><label class="form-label">Rows</label><select name="per_page" class="form-select amsa-form-control"><?php foreach ([10,25,50] as $option): ?><option value="<?php echo $option; ?>" <?php echo $perPage === $option ? 'selected' : ''; ?>><?php echo $option; ?></option><?php endforeach; ?></select></div>
+        <div class="col-md-2 d-flex align-items-end gap-2"><input type="hidden" name="page" value="1"><button type="submit" class="btn btn-primary amsa-btn amsa-btn-primary">Apply</button><a href="members.php" class="btn btn-secondary amsa-btn amsa-btn-secondary">Reset</a></div>
+    </form>
     <?php if (empty($members)): ?>
         <div class="amsa-empty-state">
             <i class="fas fa-users fa-2x mb-3 text-primary"></i>
@@ -183,6 +268,13 @@ include 'includes/header.php';
                 <?php endforeach; ?>
             </tbody>
         </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+        <span class="text-muted">Page <?php echo (int) $page; ?> of <?php echo (int) $totalPages; ?></span>
+        <div class="btn-group">
+            <a class="btn btn-outline-primary amsa-btn <?php echo $page <= 1 ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(membersPageUrl(['page' => max(1, $page - 1)])); ?>">Previous</a>
+            <a class="btn btn-outline-primary amsa-btn <?php echo $page >= $totalPages ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(membersPageUrl(['page' => min($totalPages, $page + 1)])); ?>">Next</a>
+        </div>
     </div>
     <?php endif; ?>
 </div>

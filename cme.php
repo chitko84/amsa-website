@@ -1,6 +1,26 @@
 <?php
 require_once 'config/database.php';
-$events = getAllEvents();
+$contentPage = max(1, (int) ($_GET['page'] ?? 1));
+$contentPerPage = (int) ($_GET['per_page'] ?? 9);
+if (!in_array($contentPerPage, [9, 18, 27], true)) {
+    $contentPerPage = 9;
+}
+$eventPageData = getPostsPaginated(['community_engagement'], $contentPage, $contentPerPage);
+$events = $eventPageData['posts'];
+$totalEvents = $eventPageData['total_count'];
+$contentPage = $eventPageData['current_page'];
+$totalPages = $eventPageData['total_pages'];
+$contentPerPage = $eventPageData['per_page'];
+
+function cmePageUrl(array $overrides = []) {
+    global $contentPerPage, $contentPage;
+
+    $params = array_merge([
+        'per_page' => $contentPerPage,
+        'page' => $contentPage,
+    ], $overrides);
+    return 'cme.php?' . http_build_query($params);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -396,6 +416,19 @@ $events = getAllEvents();
                     </div>
                     <?php endforeach; ?>
                 </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4">
+                    <span class="text-muted">Showing page <?php echo (int) $contentPage; ?> of <?php echo (int) $totalPages; ?> (<?php echo (int) $totalEvents; ?> events)</span>
+                    <div class="d-flex gap-2 align-items-center">
+                        <form method="GET" class="d-inline-flex gap-2">
+                            <input type="hidden" name="page" value="1">
+                            <select name="per_page" class="form-select" onchange="this.form.submit()">
+                                <?php foreach ([9, 18, 27] as $option): ?><option value="<?php echo $option; ?>" <?php echo $contentPerPage === $option ? 'selected' : ''; ?>><?php echo $option; ?></option><?php endforeach; ?>
+                            </select>
+                        </form>
+                        <a class="btn btn-outline-primary amsa-btn <?php echo $contentPage <= 1 ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(cmePageUrl(['page' => max(1, $contentPage - 1)])); ?>">Previous</a>
+                        <a class="btn btn-outline-primary amsa-btn <?php echo $contentPage >= $totalPages ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(cmePageUrl(['page' => min($totalPages, $contentPage + 1)])); ?>">Next</a>
+                    </div>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -453,7 +486,7 @@ $events = getAllEvents();
             </div>
         </div>
     </div>
-    <div class="container-fluid text-white" style="background: #061429;">
+    <div class="container-fluid text-white footer-copyright" style="background: #320010; border-top: 1px solid rgba(255,255,255,0.08);">
         <div class="container text-center">
             <div class="row justify-content-end">
                 <div class="col-lg-8 col-md-6">

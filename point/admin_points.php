@@ -5,7 +5,31 @@ requireAdmin('../admin/login.php');
 $userId = currentUserId();
 
 $statistics = getPointStatistics();
-$requests = getAllPointRequests();
+$allowedStatuses = ['all', 'pending', 'approved', 'rejected'];
+$allowedSorts = ['newest', 'oldest', 'points_desc', 'points_asc', 'status'];
+$allowedPerPage = [10, 25, 50];
+$status = $_GET['status'] ?? 'all';
+$statusFilter = in_array($status, $allowedStatuses, true) ? $status : 'all';
+$sort = $_GET['sort'] ?? 'newest';
+$sortOption = in_array($sort, $allowedSorts, true) ? $sort : 'newest';
+$currentPage = max(1, (int) ($_GET['page'] ?? 1));
+$perPage = (int) ($_GET['per_page'] ?? 10);
+if (!in_array($perPage, $allowedPerPage, true)) {
+    $perPage = 10;
+}
+
+function adminPointsUrl(array $overrides = []) {
+    global $statusFilter, $sortOption, $currentPage, $perPage;
+
+    $params = array_merge([
+        'status' => $statusFilter,
+        'sort' => $sortOption,
+        'page' => $currentPage,
+        'per_page' => $perPage,
+    ], $overrides);
+
+    return 'admin_points.php?' . http_build_query($params);
+}
 
 // Handle request approval/rejection
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
@@ -19,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     if ($action === 'delete') {
         $deleteMessage = '';
         if (deletePointRequestIfAllowed($requestId, $userId, $deleteMessage)) {
-            header("Location: admin_points.php?deleted=1");
+            header("Location: " . adminPointsUrl(['deleted' => 1]));
             exit();
         }
         $error = $deleteMessage;
@@ -34,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         $status = $statusMap[$action];
         
         if (updatePointRequestStatus($requestId, $status, $userId, $remarks)) {
-            header("Location: admin_points.php?success=1");
+            header("Location: " . adminPointsUrl(['success' => 1]));
             exit();
         } else {
             $error = "Failed to update request. Please try again.";
@@ -42,6 +66,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     }
     }
 }
+
+$requestPage = getPointRequestsPaginated($statusFilter, $sortOption, $currentPage, $perPage);
+$requests = $requestPage['requests'];
+$totalRequests = $requestPage['total_count'];
+$currentPage = $requestPage['current_page'];
+$totalPages = $requestPage['total_pages'];
+$perPage = $requestPage['per_page'];
+$showingStart = $totalRequests > 0 ? (($currentPage - 1) * $perPage) + 1 : 0;
+$showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $totalRequests) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -126,6 +159,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             Only member accounts are eligible for leaderboard ranking.
         </div>
 
+        <div class="amsa-card mb-4">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Status Filter</label>
+                    <select name="status" class="form-select amsa-form-control">
+                        <option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All</option>
+                        <option value="pending" <?php echo $statusFilter === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                        <option value="approved" <?php echo $statusFilter === 'approved' ? 'selected' : ''; ?>>Approved</option>
+                        <option value="rejected" <?php echo $statusFilter === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Sort By</label>
+                    <select name="sort" class="form-select amsa-form-control">
+                        <option value="newest" <?php echo $sortOption === 'newest' ? 'selected' : ''; ?>>Newest first</option>
+                        <option value="oldest" <?php echo $sortOption === 'oldest' ? 'selected' : ''; ?>>Oldest first</option>
+                        <option value="points_desc" <?php echo $sortOption === 'points_desc' ? 'selected' : ''; ?>>Points high to low</option>
+                        <option value="points_asc" <?php echo $sortOption === 'points_asc' ? 'selected' : ''; ?>>Points low to high</option>
+                        <option value="status" <?php echo $sortOption === 'status' ? 'selected' : ''; ?>>Status</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Rows Per Page</label>
+                    <select name="per_page" class="form-select amsa-form-control">
+                        <?php foreach ([10, 25, 50] as $option): ?>
+                            <option value="<?php echo $option; ?>" <?php echo $perPage === $option ? 'selected' : ''; ?>><?php echo $option; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="hidden" name="page" value="1">
+                    <button type="submit" class="btn btn-primary amsa-btn amsa-btn-primary w-100">Apply</button>
+                </div>
+                <div class="col-md-2">
+                    <a href="admin_points.php" class="btn btn-outline-primary amsa-btn amsa-btn-ghost w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+
         <div class="row mb-4">
             <div class="col-md-3">
                 <div class="stat-card amsa-stat-card text-center">
@@ -163,7 +235,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             </div>
             <div class="card-body">
                 <?php if(empty($requests)): ?>
-                    <div class="alert alert-info amsa-alert amsa-alert-info amsa-empty-state">No point requests found.</div>
+                    <div class="amsa-empty-state mb-0">
+                        <i class="fas fa-clipboard-list fa-2x mb-3 text-primary"></i>
+                        <h4>No point requests found for this filter.</h4>
+                        <p class="mb-0">Try another status filter or reset the request list.</p>
+                    </div>
                 <?php else: ?>
                     <div class="table-responsive amsa-table-wrap">
                         <table class="table table-hover amsa-table">
@@ -337,6 +413,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="amsa-card mt-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div class="text-muted">
+                                Showing <?php echo (int) $showingStart; ?>&ndash;<?php echo (int) $showingEnd; ?> of <?php echo (int) $totalRequests; ?> requests
+                            </div>
+                            <nav aria-label="Point request pagination">
+                                <ul class="pagination mb-0 flex-wrap">
+                                    <li class="page-item <?php echo $currentPage <= 1 ? 'disabled' : ''; ?>">
+                                        <a class="page-link" href="<?php echo htmlspecialchars(adminPointsUrl(['page' => max(1, $currentPage - 1), 'per_page' => $perPage])); ?>">Previous</a>
+                                    </li>
+                                    <?php
+                                    $startPage = max(1, $currentPage - 2);
+                                    $endPage = min($totalPages, $currentPage + 2);
+                                    for ($pageNumber = $startPage; $pageNumber <= $endPage; $pageNumber++):
+                                    ?>
+                                        <li class="page-item <?php echo $pageNumber === $currentPage ? 'active' : ''; ?>">
+                                            <a class="page-link" href="<?php echo htmlspecialchars(adminPointsUrl(['page' => $pageNumber, 'per_page' => $perPage])); ?>"><?php echo (int) $pageNumber; ?></a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    <li class="page-item <?php echo $currentPage >= $totalPages ? 'disabled' : ''; ?>">
+                                        <a class="page-link" href="<?php echo htmlspecialchars(adminPointsUrl(['page' => min($totalPages, $currentPage + 1), 'per_page' => $perPage])); ?>">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 <?php endif; ?>
             </div>

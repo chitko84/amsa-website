@@ -1,7 +1,27 @@
 <?php
 require_once 'config/database.php';
-$achievements = getAllAchievements();
+$contentPage = max(1, (int) ($_GET['page'] ?? 1));
+$contentPerPage = (int) ($_GET['per_page'] ?? 9);
+if (!in_array($contentPerPage, [9, 18, 27], true)) {
+    $contentPerPage = 9;
+}
+$achievementPageData = getPostsPaginated(['achievement'], $contentPage, $contentPerPage);
+$achievements = $achievementPageData['posts'];
+$totalAchievements = $achievementPageData['total_count'];
+$contentPage = $achievementPageData['current_page'];
+$totalPages = $achievementPageData['total_pages'];
+$contentPerPage = $achievementPageData['per_page'];
 $testimonials = getAllTestimonials();
+
+function achievementsPageUrl(array $overrides = []) {
+    global $contentPerPage, $contentPage;
+
+    $params = array_merge([
+        'per_page' => $contentPerPage,
+        'page' => $contentPage,
+    ], $overrides);
+    return 'achievements.php?' . http_build_query($params);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,6 +67,9 @@ $testimonials = getAllTestimonials();
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             margin-bottom: 30px;
             background: white;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         
         .achievement-card:hover {
@@ -67,10 +90,67 @@ $testimonials = getAllTestimonials();
             z-index: 1;
         }
         
-        .achievement-card img {
+        .achievement-card .position-relative {
+            aspect-ratio: 16 / 9;
             width: 100%;
-            height: 250px;
+            overflow: hidden;
+            flex: 0 0 auto;
+        }
+
+        .achievement-card .content-gallery {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            gap: 6px;
+        }
+
+        .achievement-card .content-gallery.gallery-count-1 {
+            grid-template-columns: 1fr;
+        }
+
+        .achievement-card .content-gallery.gallery-count-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .achievement-card .content-gallery.gallery-count-3 {
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+        }
+
+        .achievement-card .content-gallery.gallery-count-3 a:first-child {
+            grid-row: 1 / span 2;
+        }
+
+        .achievement-card .content-gallery a,
+        .achievement-card .content-gallery img,
+        .achievement-card .position-relative > img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
             object-fit: cover;
+        }
+
+        .achievement-card .p-4 {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .achievement-card h4 {
+            line-height: 1.35;
+            margin-bottom: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .achievement-card p {
+            line-height: 1.65;
+            margin-bottom: 18px;
+            overflow-wrap: anywhere;
+        }
+
+        .achievement-card .p-4 .d-flex {
+            margin-top: auto !important;
         }
         
         /* Timeline Styles - Keeping Static */
@@ -500,6 +580,19 @@ $testimonials = getAllTestimonials();
                     </div>
                     <?php endforeach; ?>
                 </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4">
+                    <span class="text-muted">Showing page <?php echo (int) $contentPage; ?> of <?php echo (int) $totalPages; ?> (<?php echo (int) $totalAchievements; ?> achievements)</span>
+                    <div class="d-flex gap-2 align-items-center">
+                        <form method="GET" class="d-inline-flex gap-2">
+                            <input type="hidden" name="page" value="1">
+                            <select name="per_page" class="form-select" onchange="this.form.submit()">
+                                <?php foreach ([9, 18, 27] as $option): ?><option value="<?php echo $option; ?>" <?php echo $contentPerPage === $option ? 'selected' : ''; ?>><?php echo $option; ?></option><?php endforeach; ?>
+                            </select>
+                        </form>
+                        <a class="btn btn-outline-primary amsa-btn <?php echo $contentPage <= 1 ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(achievementsPageUrl(['page' => max(1, $contentPage - 1)])); ?>">Previous</a>
+                        <a class="btn btn-outline-primary amsa-btn <?php echo $contentPage >= $totalPages ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(achievementsPageUrl(['page' => min($totalPages, $contentPage + 1)])); ?>">Next</a>
+                    </div>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -687,7 +780,7 @@ $testimonials = getAllTestimonials();
             </div>
         </div>
     </div>
-    <div class="container-fluid text-white" style="background: #061429;">
+    <div class="container-fluid text-white footer-copyright" style="background: #320010; border-top: 1px solid rgba(255,255,255,0.08);">
         <div class="container text-center">
             <div class="row justify-content-end">
                 <div class="col-lg-8 col-md-6">

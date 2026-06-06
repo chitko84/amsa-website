@@ -2,10 +2,14 @@
 require_once '../config/database.php';
 requireAdmin('login.php');
 
-function scalarCount($sql) {
+function getDashboardCount($sql) {
     global $conn;
     $result = $conn->query($sql);
-    return $result ? (int) $result->fetch_assoc()['total'] : 0;
+    if ($result && $row = $result->fetch_assoc()) {
+        return (int) array_values($row)[0];
+    }
+
+    return 0;
 }
 
 function latestPostsByCategory($category, $limit = 5) {
@@ -36,14 +40,14 @@ function latestContactMessages($limit = 5) {
 }
 
 $stats = [
-    ['label' => 'Total Members', 'value' => scalarCount("SELECT COUNT(*) AS total FROM user WHERE role = 'member'"), 'icon' => 'fa-users'],
-    ['label' => 'Total Points Requests', 'value' => scalarCount("SELECT COUNT(*) AS total FROM point_request"), 'icon' => 'fa-clipboard-list'],
-    ['label' => 'Pending Requests', 'value' => scalarCount("SELECT COUNT(*) AS total FROM point_request WHERE status = 'pending'"), 'icon' => 'fa-clock'],
-    ['label' => 'Approved Requests', 'value' => scalarCount("SELECT COUNT(*) AS total FROM point_request WHERE status = 'approved'"), 'icon' => 'fa-check-circle'],
-    ['label' => 'Total News', 'value' => scalarCount("SELECT COUNT(*) AS total FROM post WHERE category IN ('news','announcement','workshop','volunteer')"), 'icon' => 'fa-newspaper'],
-    ['label' => 'Total Events', 'value' => scalarCount("SELECT COUNT(*) AS total FROM post WHERE category = 'community_engagement'"), 'icon' => 'fa-calendar-alt'],
-    ['label' => 'Total Achievements', 'value' => scalarCount("SELECT COUNT(*) AS total FROM post WHERE category = 'achievement'"), 'icon' => 'fa-award'],
-    ['label' => 'Total Testimonials', 'value' => scalarCount("SELECT COUNT(*) AS total FROM post WHERE category = 'testimonial'"), 'icon' => 'fa-comment-dots'],
+    ['label' => 'Total Members', 'value' => getDashboardCount("SELECT COUNT(*) AS total FROM user WHERE role = 'member'"), 'icon' => 'fa-users'],
+    ['label' => 'Total Points Requests', 'value' => getDashboardCount("SELECT COUNT(*) AS total FROM point_request"), 'icon' => 'fa-clipboard-list'],
+    ['label' => 'Pending Requests', 'value' => getDashboardCount("SELECT COUNT(*) AS total FROM point_request WHERE status = 'pending'"), 'icon' => 'fa-clock'],
+    ['label' => 'Approved Requests', 'value' => getDashboardCount("SELECT COUNT(*) AS total FROM point_request WHERE status = 'approved'"), 'icon' => 'fa-check-circle'],
+    ['label' => 'Total News', 'value' => getDashboardCount("SELECT COUNT(*) AS total FROM post WHERE category IN ('news','announcement','workshop','volunteer')"), 'icon' => 'fa-newspaper'],
+    ['label' => 'Total Events', 'value' => getDashboardCount("SELECT COUNT(*) AS total FROM post WHERE category = 'community_engagement'"), 'icon' => 'fa-calendar-alt'],
+    ['label' => 'Total Achievements', 'value' => getDashboardCount("SELECT COUNT(*) AS total FROM post WHERE category = 'achievement'"), 'icon' => 'fa-award'],
+    ['label' => 'Total Testimonials', 'value' => getDashboardCount("SELECT COUNT(*) AS total FROM post WHERE category = 'testimonial'"), 'icon' => 'fa-comment-dots'],
 ];
 
 $events = latestPostsByCategory('community_engagement', 5);

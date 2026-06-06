@@ -26,12 +26,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$result = $conn->query("
+$contactSearch = trim($_GET['search'] ?? '');
+$sortMap = [
+    'newest' => 'submission_date DESC, id DESC',
+    'oldest' => 'submission_date ASC, id ASC',
+    'subject_asc' => 'subject ASC, id ASC',
+    'subject_desc' => 'subject DESC, id DESC',
+];
+$sortRaw = $_GET['sort'] ?? 'newest';
+$sortOption = array_key_exists($sortRaw, $sortMap) ? $sortRaw : 'newest';
+$page = max(1, (int) ($_GET['page'] ?? 1));
+$perPage = (int) ($_GET['per_page'] ?? 10);
+if (!in_array($perPage, [10, 25, 50], true)) {
+    $perPage = 10;
+}
+$orderBy = $sortMap[$sortOption] ?? $sortMap['newest'];
+$whereSql = '';
+$types = '';
+$params = [];
+if ($contactSearch !== '') {
+    $whereSql = 'WHERE name LIKE ? OR email LIKE ? OR subject LIKE ? OR message LIKE ?';
+    $types = 'ssss';
+    $searchLike = '%' . $contactSearch . '%';
+    $params = [$searchLike, $searchLike, $searchLike, $searchLike];
+}
+$countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM contact_messages $whereSql");
+if ($types !== '') {
+    $countStmt->bind_param($types, ...$params);
+}
+$countStmt->execute();
+$totalMessages = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+$totalPages = max(1, (int) ceil($totalMessages / $perPage));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $perPage;
+$stmt = $conn->prepare("
     SELECT id, name, email, whatsapp_number, subject, message, submission_date
     FROM contact_messages
-    ORDER BY submission_date DESC, id DESC
+    $whereSql
+    ORDER BY $orderBy
+    LIMIT ? OFFSET ?
 ");
-$messages = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+$queryTypes = $types . 'ii';
+$queryParams = array_merge($params, [$perPage, $offset]);
+$stmt->bind_param($queryTypes, ...$queryParams);
+$stmt->execute();
+$messages = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$showingStart = $totalMessages > 0 ? $offset + 1 : 0;
+$showingEnd = $totalMessages > 0 ? min($offset + count($messages), $totalMessages) : 0;
+
+function contactMessagesUrl(array $overrides = []) {
+    global $contactSearch, $sortOption, $perPage, $page;
+
+    $params = array_merge([
+        'search' => $contactSearch,
+        'sort' => $sortOption,
+        'per_page' => $perPage,
+        'page' => $page,
+    ], $overrides);
+    return 'contact_messages.php?' . http_build_query($params);
+}
 
 $pageTitle = 'Contact Messages';
 include 'includes/header.php';
@@ -46,8 +101,14 @@ include 'includes/header.php';
             <h3>Contact Messages</h3>
             <p>Review enquiries submitted from the public AMSA contact form.</p>
         </div>
-        <span class="amsa-badge amsa-badge-info"><?php echo count($messages); ?> messages</span>
+        <span class="amsa-badge amsa-badge-info"><?php echo (int) $totalMessages; ?> messages</span>
     </div>
+    <form method="GET" class="row g-3 mb-4">
+        <div class="col-md-5"><label class="form-label">Search</label><input type="search" name="search" class="form-control amsa-form-control" value="<?php echo htmlspecialchars($contactSearch); ?>" placeholder="Name, email, subject, or message"></div>
+        <div class="col-md-3"><label class="form-label">Sort</label><select name="sort" class="form-select amsa-form-control"><option value="newest" <?php echo $sortOption === 'newest' ? 'selected' : ''; ?>>Newest First</option><option value="oldest" <?php echo $sortOption === 'oldest' ? 'selected' : ''; ?>>Oldest First</option><option value="subject_asc" <?php echo $sortOption === 'subject_asc' ? 'selected' : ''; ?>>Subject A-Z</option><option value="subject_desc" <?php echo $sortOption === 'subject_desc' ? 'selected' : ''; ?>>Subject Z-A</option></select></div>
+        <div class="col-md-2"><label class="form-label">Rows</label><select name="per_page" class="form-select amsa-form-control"><?php foreach ([10,25,50] as $option): ?><option value="<?php echo $option; ?>" <?php echo $perPage === $option ? 'selected' : ''; ?>><?php echo $option; ?></option><?php endforeach; ?></select></div>
+        <div class="col-md-2 d-flex align-items-end gap-2"><input type="hidden" name="page" value="1"><button type="submit" class="btn btn-primary amsa-btn amsa-btn-primary">Apply</button><a href="contact_messages.php" class="btn btn-secondary amsa-btn amsa-btn-secondary">Reset</a></div>
+    </form>
 
     <?php if (empty($messages)): ?>
         <div class="amsa-empty-state">
@@ -125,6 +186,13 @@ include 'includes/header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+            <span class="text-muted">Showing <?php echo (int) $showingStart; ?>&ndash;<?php echo (int) $showingEnd; ?> of <?php echo (int) $totalMessages; ?> messages</span>
+            <div class="btn-group">
+                <a class="btn btn-outline-primary amsa-btn <?php echo $page <= 1 ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(contactMessagesUrl(['page' => max(1, $page - 1)])); ?>">Previous</a>
+                <a class="btn btn-outline-primary amsa-btn <?php echo $page >= $totalPages ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(contactMessagesUrl(['page' => min($totalPages, $page + 1)])); ?>">Next</a>
+            </div>
         </div>
     <?php endif; ?>
 </div>

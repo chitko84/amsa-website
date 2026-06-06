@@ -1,10 +1,24 @@
 <?php
 require_once 'config/database.php';
 
-$posts = getAllNewsAndEvents();
+$allowedEventCategories = ['all', 'news', 'announcement', 'workshop', 'volunteer', 'community_engagement'];
+$category = $_GET['category'] ?? 'all';
+$categoryFilter = in_array($category, $allowedEventCategories, true) ? $category : 'all';
+$contentPage = max(1, (int) ($_GET['page'] ?? 1));
+$contentPerPage = (int) ($_GET['per_page'] ?? 9);
+$contentPerPage = in_array($contentPerPage, [9, 18, 27], true) ? $contentPerPage : 9;
+$selectedCategories = $categoryFilter === 'all'
+    ? ['news', 'announcement', 'workshop', 'volunteer', 'community_engagement']
+    : [$categoryFilter];
+$postPageData = getPostsPaginated($selectedCategories, $contentPage, $contentPerPage);
+$posts = $postPageData['posts'];
+$totalPosts = $postPageData['total_count'];
+$contentPage = $postPageData['current_page'];
+$totalPages = $postPageData['total_pages'];
+$contentPerPage = $postPageData['per_page'];
 $featuredPost = $posts[0] ?? null;
-$totalNews = count(array_filter($posts, fn($post) => $post['category'] === 'news'));
-$totalEvents = count(array_filter($posts, fn($post) => $post['category'] === 'community_engagement'));
+$totalNews = countPostsByCategory('news');
+$totalEvents = countPostsByCategory('community_engagement');
 $filterLabels = [
     'all' => 'All',
     'news' => 'News',
@@ -13,6 +27,19 @@ $filterLabels = [
     'volunteer' => 'Volunteer',
     'community_engagement' => 'Events'
 ];
+
+function countPostsByCategory($category) {
+    global $conn;
+
+    $stmt = $conn->prepare("SELECT COUNT(*) AS total FROM post WHERE category = ?");
+    if (!$stmt) {
+        return 0;
+    }
+
+    $stmt->bind_param("s", $category);
+    $stmt->execute();
+    return (int) ($stmt->get_result()->fetch_assoc()['total'] ?? 0);
+}
 
 function postCategoryLabel($category) {
     return $category === 'community_engagement' ? 'Event' : ucfirst(str_replace('_', ' ', $category));
@@ -36,6 +63,17 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
     $images = getEventImages($postId);
 
     return !empty($images) ? 'uploads/' . basename($images[0]['img_name']) : $fallback;
+}
+
+function eventsPageUrl(array $overrides = []) {
+    global $categoryFilter, $contentPerPage, $contentPage;
+
+    $params = array_merge([
+        'category' => $categoryFilter,
+        'per_page' => $contentPerPage,
+        'page' => $contentPage,
+    ], $overrides);
+    return 'events.php?' . http_build_query($params);
 }
 ?>
 <!DOCTYPE html>
@@ -223,23 +261,67 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
       }
 
       .post-media {
-        height: 245px;
+        aspect-ratio: 16 / 9;
+        width: 100%;
+        height: auto;
         background: #f7f7f5;
         border-bottom: 1px solid rgba(23, 24, 32, 0.06);
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
+        border-radius: 16px;
       }
 
-      .post-media img {
+      .post-media > img {
         width: 100%;
         height: 100%;
-        object-fit: contain;
-        padding: 10px;
+        object-fit: cover;
+        display: block;
+        padding: 0;
+      }
+
+      .post-media .content-gallery {
+        display: grid;
+        width: 100%;
+        height: 100%;
+        gap: 6px;
+      }
+
+      .post-media .content-gallery.gallery-count-1 {
+        grid-template-columns: 1fr;
+      }
+
+      .post-media .content-gallery.gallery-count-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .post-media .content-gallery.gallery-count-3 {
+        grid-template-columns: 2fr 1fr;
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+      }
+
+      .post-media .content-gallery.gallery-count-3 a:first-child {
+        grid-row: 1 / span 2;
+      }
+
+      .post-media .content-gallery a,
+      .post-media .content-gallery img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+      }
+
+      .post-media .content-gallery img {
+        object-fit: cover;
+        padding: 0;
       }
 
       .news-card-body {
         padding: 24px;
+        gap: 0;
+        min-height: 0;
       }
 
       .badge-soft {
@@ -258,11 +340,15 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
         color: var(--amsa-ink);
         margin: 16px 0 10px;
         font-size: 1.25rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
       }
 
       .post-excerpt {
         color: var(--amsa-muted);
         min-height: 76px;
+        line-height: 1.65;
+        overflow-wrap: anywhere;
       }
 
       .post-meta {
@@ -490,9 +576,9 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
               <div class="toolbar d-flex flex-column gap-2">
                 <div class="filter-group d-flex gap-1 flex-wrap">
                   <?php foreach ($filterLabels as $filter => $label): ?>
-                    <button class="filter-button <?php echo $filter === 'all' ? 'active' : ''; ?>" type="button" data-filter="<?php echo htmlspecialchars($filter); ?>">
+                    <a class="filter-button text-decoration-none <?php echo $categoryFilter === $filter ? 'active' : ''; ?>" href="<?php echo htmlspecialchars(eventsPageUrl(['category' => $filter, 'page' => 1])); ?>" data-filter="<?php echo htmlspecialchars($filter); ?>">
                       <?php echo htmlspecialchars($label); ?>
-                    </button>
+                    </a>
                   <?php endforeach; ?>
                 </div>
                 <div class="input-group">
@@ -583,6 +669,20 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
               </div>
             <?php endforeach; ?>
           </div>
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4">
+            <span class="text-muted">Showing page <?php echo (int) $contentPage; ?> of <?php echo (int) $totalPages; ?> (<?php echo (int) $totalPosts; ?> posts)</span>
+            <div class="d-flex gap-2 align-items-center">
+              <form method="GET" class="d-inline-flex gap-2">
+                <input type="hidden" name="category" value="<?php echo htmlspecialchars($categoryFilter); ?>">
+                <input type="hidden" name="page" value="1">
+                <select name="per_page" class="form-select" onchange="this.form.submit()">
+                  <?php foreach ([9, 18, 27] as $option): ?><option value="<?php echo $option; ?>" <?php echo $contentPerPage === $option ? 'selected' : ''; ?>><?php echo $option; ?></option><?php endforeach; ?>
+                </select>
+              </form>
+              <a class="btn btn-outline-primary amsa-btn <?php echo $contentPage <= 1 ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(eventsPageUrl(['page' => max(1, $contentPage - 1)])); ?>">Previous</a>
+              <a class="btn btn-outline-primary amsa-btn <?php echo $contentPage >= $totalPages ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(eventsPageUrl(['page' => min($totalPages, $contentPage + 1)])); ?>">Next</a>
+            </div>
+          </div>
         <?php endif; ?>
       </div>
     </main>
@@ -640,7 +740,7 @@ function postImage($postId, $fallback = 'img/blog-1.jpg') {
             </div>
         </div>
     </div>
-    <div class="container-fluid text-white" style="background: #061429;">
+    <div class="container-fluid text-white footer-copyright" style="background: #320010; border-top: 1px solid rgba(255,255,255,0.08);">
         <div class="container text-center">
             <div class="row justify-content-end">
                 <div class="col-lg-8 col-md-6">

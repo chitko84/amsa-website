@@ -5,6 +5,8 @@
     --primary: #8b3a3a;
     --primary-light: #b55a4a;
     --primary-dark: #5f2626;
+    --amsa-gold: #c6b511;
+    --amsa-arrow-gold: var(--amsa-gold);
     --secondary: #f4b942;
     --secondary-light: #fff4cf;
     --secondary-dark: #c99220;
@@ -848,8 +850,9 @@ h5, h6, .fw-medium {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: var(--gradient-primary);
-    color: white;
+    background: linear-gradient(135deg, var(--amsa-gold, #c6b511), #b59e0e) !important;
+    border-color: var(--amsa-gold, #c6b511) !important;
+    color: #ffffff !important;
     text-align: center;
     line-height: 50px;
     font-size: 1.2rem;
@@ -861,7 +864,9 @@ h5, h6, .fw-medium {
 .back-to-top:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 20px rgba(198, 181, 17, 0.4);
-    color: white;
+    background: linear-gradient(135deg, #b59e0e, #9f8c0c) !important;
+    border-color: #b59e0e !important;
+    color: #ffffff !important;
 }
 
 .bg-header {
@@ -2001,6 +2006,42 @@ body {
     width: 52px;
 }
 
+/* Phase 11.6: Standardize public directional arrows to CME gold */
+a .bi-arrow-right,
+a .bi-arrow-left,
+a .bi-arrow-up,
+a .bi-arrow-down,
+a .fa-arrow-right,
+a .fa-arrow-left,
+a .fa-arrow-up,
+a .fa-arrow-down,
+button .bi-arrow-right,
+button .bi-arrow-left,
+button .bi-arrow-up,
+button .bi-arrow-down,
+button .fa-arrow-right,
+button .fa-arrow-left,
+button .fa-arrow-up,
+button .fa-arrow-down,
+.link-animated a i.bi-arrow-right,
+.link-animated a i.fa-arrow-right,
+.read-more-btn i {
+    color: var(--amsa-arrow-gold, #c6b511) !important;
+}
+
+.back-to-top i {
+    color: #ffffff !important;
+}
+
+.amsa-hero-breadcrumb span::before,
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--amsa-arrow-gold, #c6b511) !important;
+}
+
+.dropdown-toggle::after {
+    border-top-color: var(--amsa-arrow-gold, #c6b511) !important;
+}
+
 @media (max-width: 991.98px) {
     .navbar .btn.ms-3 {
         margin: 12px 0 0 !important;
@@ -2272,6 +2313,16 @@ a[href*="point/register.php"].amsa-register-btn:hover {
     background: #0f1115 !important;
     border: 1px solid rgba(244, 185, 66, 0.42);
     box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+}
+
+.container-fluid.bg-dark.text-light.mt-5 {
+    background: #4b0018 !important;
+}
+
+.footer-copyright,
+.container-fluid.text-white.footer-copyright {
+    background: #320010 !important;
+    border-top: 1px solid rgba(255,255,255,0.08);
 }
 
 .footer-about .navbar-logo {

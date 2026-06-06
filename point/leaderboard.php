@@ -9,10 +9,22 @@ $limitMap = [
     'all' => 0,
 ];
 $limit = $limitMap[$filter] ?? 25;
-$leaderboard = getLeaderboard($limit);
 $currentUserId = currentUserId();
 $currentUserRole = currentUserRole();
 $isAdminView = isAdminRole($currentUserRole);
+$leaderboardSearch = $isAdminView ? trim($_GET['search'] ?? '') : '';
+$leaderboard = getLeaderboard($leaderboardSearch !== '' ? 0 : $limit);
+if ($isAdminView && $leaderboardSearch !== '') {
+    $query = strtolower($leaderboardSearch);
+    $leaderboard = array_values(array_filter($leaderboard, function ($row) use ($query) {
+        return str_contains((string) $row['id'], $query)
+            || str_contains(strtolower($row['name'] ?? ''), $query)
+            || str_contains(strtolower($row['email'] ?? ''), $query);
+    }));
+    if ($limit > 0) {
+        $leaderboard = array_slice($leaderboard, 0, $limit);
+    }
+}
 $currentRank = $currentUserId ? getUserRank($currentUserId) : null;
 $topThree = array_slice($leaderboard, 0, 3);
 
@@ -118,11 +130,34 @@ function leaderboardIdentity(array $row, $currentUserId, $isAdminView) {
                 <p>Ranked by total points, approved requests, and latest approved activity.</p>
             </div>
             <div class="points-filter-group" role="group" aria-label="Leaderboard filter">
-                <a href="leaderboard.php?filter=10" class="btn btn-outline-primary amsa-btn amsa-btn-ghost <?php echo $filter === '10' ? 'active' : ''; ?>">Top 10</a>
-                <a href="leaderboard.php?filter=25" class="btn btn-outline-primary amsa-btn amsa-btn-ghost <?php echo !in_array($filter, ['10', 'all'], true) ? 'active' : ''; ?>">Top 25</a>
-                <a href="leaderboard.php?filter=all" class="btn btn-outline-primary amsa-btn amsa-btn-ghost <?php echo $filter === 'all' ? 'active' : ''; ?>">All</a>
+                <a href="leaderboard.php?filter=10<?php echo $leaderboardSearch !== '' ? '&search=' . urlencode($leaderboardSearch) : ''; ?>" class="btn btn-outline-primary amsa-btn amsa-btn-ghost <?php echo $filter === '10' ? 'active' : ''; ?>">Top 10</a>
+                <a href="leaderboard.php?filter=25<?php echo $leaderboardSearch !== '' ? '&search=' . urlencode($leaderboardSearch) : ''; ?>" class="btn btn-outline-primary amsa-btn amsa-btn-ghost <?php echo !in_array($filter, ['10', 'all'], true) ? 'active' : ''; ?>">Top 25</a>
+                <a href="leaderboard.php?filter=all<?php echo $leaderboardSearch !== '' ? '&search=' . urlencode($leaderboardSearch) : ''; ?>" class="btn btn-outline-primary amsa-btn amsa-btn-ghost <?php echo $filter === 'all' ? 'active' : ''; ?>">All</a>
             </div>
         </div>
+
+        <?php if ($isAdminView): ?>
+            <form method="GET" class="amsa-card mb-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label class="form-label">Admin Search</label>
+                        <input type="search" name="search" class="form-control amsa-form-control" value="<?php echo htmlspecialchars($leaderboardSearch); ?>" placeholder="User ID, name, or email">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Limit</label>
+                        <select name="filter" class="form-select amsa-form-control">
+                            <option value="10" <?php echo $filter === '10' ? 'selected' : ''; ?>>Top 10</option>
+                            <option value="25" <?php echo !in_array($filter, ['10', 'all'], true) ? 'selected' : ''; ?>>Top 25</option>
+                            <option value="all" <?php echo $filter === 'all' ? 'selected' : ''; ?>>All</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary amsa-btn amsa-btn-primary">Search</button>
+                        <a href="leaderboard.php?filter=<?php echo htmlspecialchars($filter); ?>" class="btn btn-secondary amsa-btn amsa-btn-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+        <?php endif; ?>
 
         <div class="card shadow-sm amsa-card">
             <div class="card-body">

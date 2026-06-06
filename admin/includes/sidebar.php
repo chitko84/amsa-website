@@ -36,6 +36,7 @@ $isSystemAdmin = canManageSettings();
             <a href="settings.php" class="<?php echo adminActive('settings.php'); ?>"><i class="fas fa-cog"></i>Settings</a>
             <a href="database_backup.php" class="<?php echo adminActive('database_backup.php'); ?>"><i class="fas fa-database"></i>Database Backup</a>
             <a href="admin_users.php" class="<?php echo adminActive('admin_users.php'); ?>"><i class="fas fa-user-shield"></i>Admin Users</a>
+            <a href="audit_logs.php" class="<?php echo adminActive('audit_logs.php'); ?>"><i class="fas fa-history"></i>Audit Logs</a>
         <?php endif; ?>
         <a href="logout.php"><i class="fas fa-sign-out-alt"></i>Logout</a>
     </nav>

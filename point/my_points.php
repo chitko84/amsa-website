@@ -5,7 +5,36 @@ requireMember('login.php');
 $userId = currentUserId();
 $userPoints = getUserPoints($userId);
 $userRequests = getUserPointRequests($userId);
+$historyStatusRaw = $_GET['status'] ?? 'all';
+$historyStatus = in_array($historyStatusRaw, ['all', 'pending', 'approved', 'rejected'], true) ? $historyStatusRaw : 'all';
+$historySortRaw = $_GET['sort'] ?? 'newest';
+$historySort = in_array($historySortRaw, ['newest', 'oldest', 'points_desc', 'points_asc'], true) ? $historySortRaw : 'newest';
+$historyPage = max(1, (int) ($_GET['page'] ?? 1));
+$historyPerPage = (int) ($_GET['per_page'] ?? 10);
+if (!in_array($historyPerPage, [10, 25, 50], true)) {
+    $historyPerPage = 10;
+}
+$historyPageData = getUserPointRequestsPaginated($userId, $historyStatus, $historySort, $historyPage, $historyPerPage);
+$historyRequests = $historyPageData['requests'];
+$historyTotal = $historyPageData['total_count'];
+$historyPage = $historyPageData['current_page'];
+$historyTotalPages = $historyPageData['total_pages'];
+$historyPerPage = $historyPageData['per_page'];
+$historyStart = $historyTotal > 0 ? (($historyPage - 1) * $historyPerPage) + 1 : 0;
+$historyEnd = $historyTotal > 0 ? min($historyStart + count($historyRequests) - 1, $historyTotal) : 0;
 $currentRank = function_exists('getUserRank') ? getUserRank($userId) : null;
+
+function myPointsHistoryUrl(array $overrides = []) {
+    global $historyStatus, $historySort, $historyPerPage, $historyPage;
+
+    $params = array_merge([
+        'status' => $historyStatus,
+        'sort' => $historySort,
+        'per_page' => $historyPerPage,
+        'page' => $historyPage,
+    ], $overrides);
+    return 'my_points.php?' . http_build_query($params);
+}
 
 $approvedCount = 0;
 $pendingCount = 0;
@@ -30,6 +59,7 @@ foreach ($userRequests as $request) {
     <link href="../img/logo.png" rel="apple-touch-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="points-style.css" rel="stylesheet">
+    <link href="../assets/css/amsa-chatbot.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="points-page">
@@ -54,7 +84,7 @@ foreach ($userRequests as $request) {
             <div>
                 <div class="amsa-stat-card points-stat-card">
                     <span class="stat-icon"><i class="fas fa-trophy"></i></span>
-                    <h2><?php echo $currentRank ? '#' . (int) $currentRank['rank'] : 'N/A'; ?></h2>
+                    <h2><?php echo $currentRank ? '#' . (int) $currentRank['rank'] : 'Not ranked yet'; ?></h2>
                     <p class="text-muted mb-0">Current Rank</p>
                 </div>
             </div>
@@ -99,6 +129,12 @@ foreach ($userRequests as $request) {
                         <a href="point_request.php" class="btn btn-primary amsa-btn amsa-btn-primary">Submit Activity</a>
                     </div>
                 <?php else: ?>
+                    <form method="GET" class="row g-3 mb-4">
+                        <div class="col-md-3"><label class="form-label">Status</label><select name="status" class="form-select amsa-form-control"><option value="all" <?php echo $historyStatus === 'all' ? 'selected' : ''; ?>>All</option><option value="pending" <?php echo $historyStatus === 'pending' ? 'selected' : ''; ?>>Pending</option><option value="approved" <?php echo $historyStatus === 'approved' ? 'selected' : ''; ?>>Approved</option><option value="rejected" <?php echo $historyStatus === 'rejected' ? 'selected' : ''; ?>>Rejected</option></select></div>
+                        <div class="col-md-3"><label class="form-label">Sort</label><select name="sort" class="form-select amsa-form-control"><option value="newest" <?php echo $historySort === 'newest' ? 'selected' : ''; ?>>Newest First</option><option value="oldest" <?php echo $historySort === 'oldest' ? 'selected' : ''; ?>>Oldest First</option><option value="points_desc" <?php echo $historySort === 'points_desc' ? 'selected' : ''; ?>>Points High-Low</option><option value="points_asc" <?php echo $historySort === 'points_asc' ? 'selected' : ''; ?>>Points Low-High</option></select></div>
+                        <div class="col-md-2"><label class="form-label">Rows</label><select name="per_page" class="form-select amsa-form-control"><?php foreach ([10,25,50] as $option): ?><option value="<?php echo $option; ?>" <?php echo $historyPerPage === $option ? 'selected' : ''; ?>><?php echo $option; ?></option><?php endforeach; ?></select></div>
+                        <div class="col-md-4 d-flex align-items-end gap-2"><input type="hidden" name="page" value="1"><button type="submit" class="btn btn-primary amsa-btn amsa-btn-primary">Apply</button><a href="my_points.php" class="btn btn-secondary amsa-btn amsa-btn-secondary">Reset</a></div>
+                    </form>
                     <div class="points-card-list mb-4">
                         <?php foreach (array_slice($userRequests, 0, 4) as $request): ?>
                             <div class="amsa-card points-activity-card">
@@ -114,6 +150,13 @@ foreach ($userRequests as $request) {
                             </div>
                         <?php endforeach; ?>
                     </div>
+                    <?php if (empty($historyRequests)): ?>
+                        <div class="amsa-empty-state mb-0">
+                            <i class="fas fa-clipboard-list fa-2x mb-3 text-primary"></i>
+                            <h4>No requests found for this filter.</h4>
+                            <p class="mb-0">Try another status filter or reset your request history.</p>
+                        </div>
+                    <?php else: ?>
                     <div class="table-responsive amsa-table-wrap">
                         <table class="table align-middle amsa-table">
                             <thead>
@@ -127,7 +170,7 @@ foreach ($userRequests as $request) {
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($userRequests as $request): ?>
+                                <?php foreach ($historyRequests as $request): ?>
                                     <?php
                                     $badge = $request['status'] === 'approved' ? 'success' : ($request['status'] === 'pending' ? 'warning text-dark' : 'danger');
                                     ?>
@@ -149,11 +192,23 @@ foreach ($userRequests as $request) {
                             </tbody>
                         </table>
                     </div>
+                    <?php endif; ?>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                        <span class="text-muted">Showing <?php echo (int) $historyStart; ?>&ndash;<?php echo (int) $historyEnd; ?> of <?php echo (int) $historyTotal; ?> requests</span>
+                        <div class="btn-group">
+                            <a class="btn btn-outline-primary amsa-btn <?php echo $historyPage <= 1 ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(myPointsHistoryUrl(['page' => max(1, $historyPage - 1)])); ?>">Previous</a>
+                            <a class="btn btn-outline-primary amsa-btn <?php echo $historyPage >= $historyTotalPages ? 'disabled' : ''; ?>" href="<?php echo htmlspecialchars(myPointsHistoryUrl(['page' => min($historyTotalPages, $historyPage + 1)])); ?>">Next</a>
+                        </div>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/amsa-chatbot.js"></script>
+    <script>
+        window.AmsaChatbot && window.AmsaChatbot.init({ preset: 'points' });
+    </script>
 </body>
 </html>

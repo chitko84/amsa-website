@@ -288,7 +288,8 @@ ALTER TABLE `point_request`
   ADD KEY `fk_point_request_user` (`user_id`),
   ADD KEY `fk_point_request_category` (`point_category_id`),
   ADD KEY `fk_point_request_reviewer` (`reviewed_by`),
-  ADD KEY `idx_point_request_status_date` (`status`,`request_date`);
+  ADD KEY `idx_point_request_status_date` (`status`,`request_date`),
+  ADD KEY `idx_point_request_user_status` (`user_id`,`status`);
 
 --
 -- Indexes for table `point_transactions`
@@ -316,7 +317,8 @@ ALTER TABLE `post`
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `idx_user_role_status` (`role`,`status`);
+  ADD KEY `idx_user_role_status` (`role`,`status`),
+  ADD KEY `idx_user_role_status_created` (`role`,`status`,`created_at`);
 
 --
 -- Indexes for table `user_points`
@@ -334,7 +336,8 @@ ALTER TABLE `audit_logs`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_audit_logs_user` (`user_id`),
   ADD KEY `idx_audit_logs_entity` (`entity_type`,`entity_id`),
-  ADD KEY `idx_audit_logs_created_at` (`created_at`);
+  ADD KEY `idx_audit_logs_created_at` (`created_at`),
+  ADD KEY `idx_audit_logs_action` (`action`);
 
 --
 -- AUTO_INCREMENT for dumped tables

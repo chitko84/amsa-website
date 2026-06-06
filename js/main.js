@@ -58,16 +58,39 @@
 
   // Back to top button
   $(window).scroll(function () {
-    if ($(this).scrollTop() > 100) {
-      $(".back-to-top").fadeIn("slow");
+    if ($(this).scrollTop() > 300) {
+      $(".back-to-top").fadeIn(100);
     } else {
-      $(".back-to-top").fadeOut("slow");
+      $(".back-to-top").fadeOut(100);
     }
   });
-  $(".back-to-top").click(function () {
-    $("html, body").animate({ scrollTop: 0 }, 1500, "easeInOutExpo");
-    return false;
-  });
+
+  const attachBackToTop = function () {
+    document.addEventListener(
+      "click",
+      function (e) {
+        const btn = e.target.closest(".back-to-top, #back-to-top, .scroll-top, #scroll-top");
+        if (!btn) {
+          return;
+        }
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        $(".back-to-top").stop(true, true).fadeOut(100);
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      },
+      true
+    );
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", attachBackToTop);
+  } else {
+    attachBackToTop();
+  }
 
   // Testimonials carousel
   $(".testimonial-carousel").owlCarousel({
