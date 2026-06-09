@@ -88,43 +88,398 @@ $showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $to
     <link href="points-style.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <style>
+    :root {
+        --amsa-wine: #5f2626;
+        --amsa-wine-dark: #3b1118;
+        --amsa-gold: #f4b942;
+        --amsa-cream: #fff8ef;
+        --amsa-soft: #f7f1ea;
+        --amsa-text: #2b2020;
+        --amsa-muted: #7b6f6a;
+    }
+
+    body.points-page {
+        background:
+            radial-gradient(circle at top left, rgba(244,185,66,.18), transparent 30%),
+            linear-gradient(180deg, #fff8ef 0%, #f7f1ea 45%, #ffffff 100%);
+        color: var(--amsa-text);
+    }
+
+    .points-hero {
+        background:
+            linear-gradient(135deg, rgba(59,17,24,.96), rgba(95,38,38,.92)),
+            radial-gradient(circle at top right, rgba(244,185,66,.28), transparent 35%) !important;
+        padding: 70px 0 !important;
+        margin-bottom: 40px !important;
+        border-bottom: 5px solid var(--amsa-gold);
+        box-shadow: 0 18px 45px rgba(95,38,38,.22);
+    }
+
+    .points-hero h1 {
+        font-weight: 900;
+        letter-spacing: -1px;
+    }
+
+    .points-hero p {
+        opacity: .9;
+        font-size: 1.1rem;
+    }
+
+    .amsa-alert {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 26px rgba(95,38,38,.08);
+    }
+
+    .amsa-card,
+    .card {
+        border: 1px solid rgba(95,38,38,.08) !important;
+        border-radius: 22px !important;
+        box-shadow: 0 18px 45px rgba(95,38,38,.10) !important;
+        background: rgba(255,255,255,.96);
+        overflow: hidden;
+    }
+
+    .amsa-card form {
+        padding: 6px;
+    }
+
+    .form-label {
+        color: var(--amsa-wine-dark);
+        font-size: .9rem;
+    }
+
+    .amsa-form-control,
+    .form-select {
+        border-radius: 14px !important;
+        border: 1px solid #eadbd2 !important;
+        min-height: 48px;
+        background-color: #fffdfb;
+        font-weight: 600;
+    }
+
+    .amsa-form-control:focus,
+    .form-select:focus {
+        border-color: var(--amsa-gold) !important;
+        box-shadow: 0 0 0 .22rem rgba(244,185,66,.22) !important;
+    }
+
+    .amsa-btn,
+    .btn {
+        border-radius: 999px !important;
+        font-weight: 800;
+        transition: all .22s ease;
+    }
+
+    .amsa-btn:hover,
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .amsa-btn-primary,
+    .btn-primary {
+        background: linear-gradient(135deg, var(--amsa-wine), var(--amsa-wine-dark)) !important;
+        border: none !important;
+        color: #fff !important;
+        box-shadow: 0 12px 26px rgba(95,38,38,.22);
+    }
+
+    .amsa-btn-ghost,
+    .btn-outline-primary {
+        border: 1px solid var(--amsa-wine) !important;
+        color: var(--amsa-wine) !important;
+        background: transparent !important;
+    }
+
+    .amsa-btn-ghost:hover,
+    .btn-outline-primary:hover {
+        background: var(--amsa-wine) !important;
+        color: #fff !important;
+    }
+
+    .stat-card {
+        position: relative;
+        background: #ffffff;
+        border-radius: 22px;
+        padding: 26px 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 18px 42px rgba(95,38,38,.10);
+        border: 1px solid rgba(95,38,38,.08);
+        transition: .25s ease;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--amsa-gold), var(--amsa-wine));
+    }
+
+    .stat-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 26px 60px rgba(95,38,38,.16);
+    }
+
+    .stat-icon {
+        width: 58px;
+        height: 58px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #fff4cf, #ffffff);
+        color: var(--amsa-wine);
+        font-size: 28px;
+        margin-bottom: 8px;
+        box-shadow: inset 0 0 0 1px rgba(244,185,66,.35);
+    }
+
+    .stat-card h3 {
+        color: var(--amsa-wine-dark);
+        font-size: 1.8rem;
+        font-weight: 900;
+        margin-bottom: 4px;
+        word-break: break-word;
+    }
+
+    .stat-card p {
+        font-weight: 700;
+        color: var(--amsa-muted) !important;
+    }
+
+    .card-header {
+        background:
+            linear-gradient(135deg, #ffffff, #fff8ef) !important;
+        border-bottom: 1px solid rgba(95,38,38,.08);
+        padding: 20px 24px;
+    }
+
+    .card-header h5 {
+        font-weight: 900;
+        color: var(--amsa-wine-dark);
+    }
+
+    .table-responsive {
+        border-radius: 18px;
+        overflow-x: auto;
+    }
+
+    .amsa-table {
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+
+    .amsa-table thead th {
+        background: var(--amsa-wine-dark);
+        color: #fff;
+        border: none;
+        padding: 15px;
+        font-size: .85rem;
+        white-space: nowrap;
+    }
+
+    .amsa-table tbody td {
+        padding: 16px 14px;
+        border-color: #f0e5dc;
+        font-size: .92rem;
+    }
+
+    .amsa-table tbody tr:hover {
+        background: #fff8ef;
+    }
+
+    .profile-member-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 220px;
+    }
+
+    .profile-avatar-sm {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--amsa-gold);
+        background: #fff;
+    }
+
+    .status-badge {
+        padding: 7px 13px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+    }
+
+    .status-pending {
+        background: #fff4cf;
+        color: #7a5800;
+    }
+
+    .status-approved {
+        background: #e6f6ed;
+        color: #167241;
+    }
+
+    .status-rejected {
+        background: #fde9e9;
+        color: #a92d2d;
+    }
+
+    .evidence-link {
+        color: var(--amsa-wine);
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .evidence-link:hover {
+        color: var(--amsa-gold);
+        text-decoration: none;
+    }
+
+    .amsa-btn-sm,
+    .btn-sm {
+        padding: 7px 12px !important;
+        font-size: .78rem;
+        margin: 2px;
+    }
+
+    .btn-success {
+        background: #2f8f57 !important;
+        border: none !important;
+    }
+
+    .btn-danger,
+    .amsa-btn-danger {
+        background: #b44444 !important;
+        border: none !important;
+        color: #fff !important;
+    }
+
+    .btn-outline-danger {
+        border: 1px solid #b44444 !important;
+        color: #b44444 !important;
+        background: transparent !important;
+    }
+
+    .btn-outline-danger:hover {
+        background: #b44444 !important;
+        color: #fff !important;
+    }
+
+    .btn-outline-warning {
+        border: 1px solid var(--amsa-gold) !important;
+        color: #7a5800 !important;
+        background: #fff9e6 !important;
+    }
+
+    .modal-content,
+    .amsa-modal {
+        border: none;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 26px 70px rgba(43,32,32,.25);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--amsa-wine), var(--amsa-wine-dark));
+        color: #fff;
+        border-bottom: 4px solid var(--amsa-gold);
+    }
+
+    .modal-header .btn-close {
+        filter: invert(1);
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .modal-footer {
+        background: #fff8ef;
+        border-top: 1px solid #eadbd2;
+    }
+
+    .modal-img {
+        max-width: 100%;
+        border-radius: 18px;
+        box-shadow: 0 12px 30px rgba(0,0,0,.12);
+    }
+
+    .amsa-empty-state {
+        background: #fff8ef;
+        border: 1px dashed rgba(95,38,38,.22);
+        border-radius: 22px;
+        padding: 45px 20px;
+        text-align: center;
+    }
+
+    .amsa-empty-state i {
+        color: var(--amsa-wine) !important;
+    }
+
+    .pagination .page-link {
+        border: none;
+        color: var(--amsa-wine);
+        font-weight: 800;
+        border-radius: 12px;
+        margin: 2px;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--amsa-wine);
+        color: #fff;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #aaa;
+        background: #f7f1ea;
+    }
+
+    @media (max-width: 991.98px) {
+        .points-hero {
+            padding: 50px 0 !important;
+        }
+
+        .points-hero h1 {
+            font-size: 2rem;
+        }
+
         .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
+            padding: 22px 16px;
         }
-        .stat-card:hover {
-            transform: translateY(-5px);
+
+        .card-body {
+            padding: 18px;
         }
-        .stat-icon {
-            font-size: 40px;
-            color: #8B3A3A;
+    }
+
+    @media (max-width: 575.98px) {
+        .container {
+            padding-left: 14px;
+            padding-right: 14px;
         }
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
+
+        .points-hero h1 {
+            font-size: 1.7rem;
         }
-        .status-pending { background: var(--amsa-color-gold, #f4b942); color: var(--amsa-color-text, #2b2020); }
-        .status-approved { background: var(--amsa-color-success, #2f8f57); color: #fff; }
-        .status-rejected { background: var(--amsa-color-error, #b44444); color: #fff; }
-        .evidence-link {
-            color: #8B3A3A;
-            text-decoration: none;
+
+        .points-hero p {
+            font-size: .95rem;
         }
-        .evidence-link:hover {
-            text-decoration: underline;
+
+        .amsa-btn-sm,
+        .btn-sm {
+            width: 100%;
+            margin-bottom: 5px;
         }
-        .modal-img {
-            max-width: 100%;
-            border-radius: 10px;
-        }
-    </style>
+    }
+</style>
 </head>
 <body class="points-page">
     <?php include __DIR__ . '/includes/navbar.php'; ?>
