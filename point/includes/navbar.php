@@ -47,10 +47,10 @@ function pointsNavActive($page) {
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="admin_points.php">Admin Review</a></li>
                     <li><a class="dropdown-item" href="point_categories_admin.php">Categories</a></li>
+                    <li><a class="dropdown-item" href="../admin/dashboard.php">Admin Panel</a></li>
                 <?php endif; ?>
                 <?php if ($pointsIsSystemAdmin): ?>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="../admin/dashboard.php">Admin Panel</a></li>
                     <li><a class="dropdown-item" href="../admin/admin_users.php">Admin Users</a></li>
                 <?php endif; ?>
                 <li><hr class="dropdown-divider"></li>
@@ -76,9 +76,9 @@ function pointsNavActive($page) {
                 <?php if ($pointsIsAdmin): ?>
                     <a class="nav-link <?php echo pointsNavActive('admin_points.php'); ?>" href="admin_points.php">Admin Review</a>
                     <a class="nav-link <?php echo pointsNavActive('point_categories_admin.php'); ?>" href="point_categories_admin.php">Categories</a>
+                    <a class="nav-link" href="../admin/dashboard.php">Admin Panel</a>
                 <?php endif; ?>
                 <?php if ($pointsIsSystemAdmin): ?>
-                    <a class="nav-link" href="../admin/dashboard.php">Admin Panel</a>
                     <a class="nav-link" href="../admin/admin_users.php">Admin Users</a>
                 <?php endif; ?>
                 <a class="nav-link text-danger" href="logout.php">Logout</a>

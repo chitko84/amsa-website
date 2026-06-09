@@ -21,6 +21,10 @@
     cursor: pointer;
 }
 
+.amsa-chatbot-toggle i {
+    line-height: 1;
+}
+
 .amsa-chatbot-toggle:hover,
 .amsa-chatbot-toggle:focus {
     background: linear-gradient(135deg, #2c0410, #6e122d);
@@ -137,45 +141,6 @@
 .amsa-chatbot-chip:hover,
 .amsa-chatbot-chip:focus {
     background: #c6b511;
-    outline: none;
-}
-
-.amsa-chatbot-form {
-    display: flex;
-    gap: 8px;
-    padding: 14px;
-    background: #ffffff;
-    border-top: 1px solid rgba(44, 4, 16, 0.08);
-}
-
-.amsa-chatbot-input {
-    flex: 1;
-    min-width: 0;
-    border: 1px solid rgba(44, 4, 16, 0.14);
-    border-radius: 999px;
-    padding: 10px 13px;
-    font-size: 0.92rem;
-}
-
-.amsa-chatbot-input:focus {
-    outline: 3px solid rgba(198, 181, 17, 0.28);
-    border-color: #c6b511;
-}
-
-.amsa-chatbot-send {
-    border: 0;
-    border-radius: 999px;
-    background: #2c0410;
-    color: #ffffff;
-    padding: 10px 14px;
-    font-weight: 800;
-    cursor: pointer;
-}
-
-.amsa-chatbot-send:hover,
-.amsa-chatbot-send:focus {
-    background: #c6b511;
-    color: #2c0410;
     outline: none;
 }
 

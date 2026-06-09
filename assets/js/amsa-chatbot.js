@@ -104,16 +104,16 @@
         public: {
             name: "AMSA Assistant",
             subtitle: "Website navigation help",
-            greeting: "Hi, I am AMSA Assistant. Ask me about AMSA, events, achievements, registration, contact details, or website pages.",
-            fallback: "I’m not fully sure about that. You can explore the website menu or contact AMSA at <a href=\"mailto:amsa@student.aiu.edu.my\">amsa@student.aiu.edu.my</a> for more help.",
+            greeting: "Hi, I am AMSA Assistant. Choose a question below.",
+            fallback: "I am not fully sure about that. You can explore the website menu or contact AMSA at <a href=\"mailto:amsa@student.aiu.edu.my\">amsa@student.aiu.edu.my</a> for more help.",
             quickQuestions: ["What is AMSA?", "How can I contact AMSA?", "Where can I register?", "Show me events"],
             rules: publicRules
         },
         points: {
             name: "AMSA Points Assistant",
             subtitle: "Points system help",
-            greeting: "Hi, I am AMSA Points Assistant. Ask me about points, submissions, evidence, statuses, profile photos, or leaderboard privacy.",
-            fallback: "I’m not fully sure about that. You can check the Dashboard, Submit Activity, Leaderboard, or contact AMSA at <a href=\"mailto:amsa@student.aiu.edu.my\">amsa@student.aiu.edu.my</a>.",
+            greeting: "Hi, I am AMSA Points Assistant. Choose a question below.",
+            fallback: "I am not fully sure about that. You can check the Dashboard, Submit Activity, Leaderboard, or contact AMSA at <a href=\"mailto:amsa@student.aiu.edu.my\">amsa@student.aiu.edu.my</a>.",
             quickQuestions: ["How do I earn points?", "Why am I not ranked?", "What evidence can I upload?", "Why are names hidden?"],
             rules: pointsRules
         }
@@ -149,12 +149,11 @@
         var root = document.createElement("div");
         root.className = "amsa-chatbot";
         root.innerHTML = '' +
-            '<button class="amsa-chatbot-toggle" type="button" aria-label="Open ' + escapeHtml(config.name) + '">?</button>' +
+            '<button class="amsa-chatbot-toggle" type="button" aria-label="Open ' + escapeHtml(config.name) + '"><i class="fas fa-robot" aria-hidden="true"></i></button>' +
             '<section class="amsa-chatbot-panel" aria-label="' + escapeHtml(config.name) + '">' +
             '<div class="amsa-chatbot-header"><div><h2 class="amsa-chatbot-title">' + escapeHtml(config.name) + '</h2><p class="amsa-chatbot-subtitle">' + escapeHtml(config.subtitle) + '</p></div><button class="amsa-chatbot-close" type="button" aria-label="Close chat">×</button></div>' +
             '<div class="amsa-chatbot-messages"></div>' +
-            '<div class="amsa-chatbot-quick"></div>' +
-            '<form class="amsa-chatbot-form"><input class="amsa-chatbot-input" type="text" autocomplete="off" placeholder="Ask a question..." aria-label="Ask a question"><button class="amsa-chatbot-send" type="submit">Send</button></form>' +
+            '<div class="amsa-chatbot-quick" aria-label="Frequently asked questions"></div>' +
             '</section>';
         document.body.appendChild(root);
 
@@ -162,8 +161,6 @@
         var close = root.querySelector(".amsa-chatbot-close");
         var messages = root.querySelector(".amsa-chatbot-messages");
         var quick = root.querySelector(".amsa-chatbot-quick");
-        var form = root.querySelector(".amsa-chatbot-form");
-        var input = root.querySelector(".amsa-chatbot-input");
 
         addMessage(messages, "bot", config.greeting);
 
@@ -173,35 +170,22 @@
             chip.type = "button";
             chip.textContent = question;
             chip.addEventListener("click", function () {
-                submitQuestion(question);
+                var value = String(question || "").trim();
+                if (!value) {
+                    return;
+                }
+                addMessage(messages, "user", value);
+                addMessage(messages, "bot", findAnswer(config, value));
             });
             quick.appendChild(chip);
         });
 
-        function submitQuestion(question) {
-            var value = String(question || "").trim();
-            if (!value) {
-                return;
-            }
-            addMessage(messages, "user", value);
-            addMessage(messages, "bot", findAnswer(config, value));
-            input.value = "";
-        }
-
         toggle.addEventListener("click", function () {
             root.classList.toggle("open");
-            if (root.classList.contains("open")) {
-                input.focus();
-            }
         });
 
         close.addEventListener("click", function () {
             root.classList.remove("open");
-        });
-
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-            submitQuestion(input.value);
         });
     }
 

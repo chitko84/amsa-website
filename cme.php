@@ -284,7 +284,8 @@ function cmePageUrl(array $overrides = []) {
                     <a href="contact.html" class="nav-item nav-link">Contact</a>
                     <a href="devteam.html" class="nav-item nav-link">Dev Team</a>
                 </div>
-                <a href="point/register.php" class="btn btn-primary amsa-btn amsa-btn-primary py-2 px-4 ms-3">Register</a>
+                <a href="point/login.php" class="btn amsa-btn amsa-login-btn py-2 px-4 ms-3">Login</a>
+                <a href="point/register.php" class="btn btn-primary amsa-btn amsa-btn-primary amsa-register-btn py-2 px-4 ms-3">Register</a>
             </div>
         </nav>
     </div>
@@ -409,7 +410,6 @@ function cmePageUrl(array $overrides = []) {
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <a href="#" class="btn btn-primary amsa-btn amsa-btn-primary">Share This Event <i class="fas fa-share-alt ms-2"></i></a>
                                 </div>
                             </div>
                         </div>

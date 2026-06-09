@@ -79,7 +79,8 @@
                     <a href="contact.html" class="nav-item nav-link">Contact</a>
                     <a href="devteam.html" class="nav-item nav-link">Dev Team</a>
                 </div>
-                <a href="point/register.php" class="btn btn-primary amsa-btn amsa-btn-primary py-2 px-4 ms-3">Register</a>
+                <a href="point/login.php" class="btn amsa-btn amsa-login-btn py-2 px-4 ms-3">Login</a>
+                <a href="point/register.php" class="btn btn-primary amsa-btn amsa-btn-primary amsa-register-btn py-2 px-4 ms-3">Register</a>
             </div>
         </nav>
 
