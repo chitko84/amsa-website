@@ -5,6 +5,8 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'amsa_web');
 
+date_default_timezone_set('Asia/Kuala_Lumpur');
+
 // Create connection
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
@@ -15,6 +17,7 @@ if ($conn->connect_error) {
 
 // Set charset to UTF-8
 $conn->set_charset("utf8mb4");
+$conn->query("SET time_zone = '+08:00'");
 
 // Start session with production-friendly cookie flags while preserving local XAMPP use.
 if (session_status() === PHP_SESSION_NONE) {
@@ -283,6 +286,35 @@ function uploadMultipleImagesSecure($files, $uploadDir, &$errors = [], $maxFiles
     }
 
     return $savedFiles;
+}
+
+function ensureFundraisingTables() {
+    global $conn;
+
+    $fundraisingSql = "
+        CREATE TABLE IF NOT EXISTS fundraising (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            description TEXT NULL,
+            status ENUM('published','draft') DEFAULT 'published',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+    ";
+
+    $imagesSql = "
+        CREATE TABLE IF NOT EXISTS fundraising_images (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            fundraising_id INT NOT NULL,
+            image_path VARCHAR(255) NOT NULL,
+            display_order INT DEFAULT 1,
+            CONSTRAINT fk_fundraising_images_fundraising
+                FOREIGN KEY (fundraising_id)
+                REFERENCES fundraising(id)
+                ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+    ";
+
+    return $conn->query($fundraisingSql) && $conn->query($imagesSql);
 }
 
 function uploadEvidenceSecure($file, $uploadDir, &$error) {

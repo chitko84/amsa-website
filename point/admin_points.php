@@ -75,6 +75,48 @@ $totalPages = $requestPage['total_pages'];
 $perPage = $requestPage['per_page'];
 $showingStart = $totalRequests > 0 ? (($currentPage - 1) * $perPage) + 1 : 0;
 $showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $totalRequests) : 0;
+
+/**
+ * Clean and decode text that may contain HTML entities, escaped quotes, and literal newlines
+ */
+function amsaDecodeTextAdmin($value) {
+    $text = (string) ($value ?? '');
+
+    // Decode HTML entities even if the text was encoded more than once.
+    for ($i = 0; $i < 3; $i++) {
+        $decoded = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if ($decoded === $text) {
+            break;
+        }
+        $text = $decoded;
+    }
+
+    // Convert saved literal escape sequences into real readable formatting.
+    $text = str_replace(["\\r\\n", "\\n", "\\r", "\\t"], ["\n", "\n", "\n", "    "], $text);
+
+    // Remove unwanted slashes from saved escaped quotes, for example \"hello\".
+    $text = stripslashes($text);
+
+    return $text;
+}
+
+function amsaTextPreviewAdmin($value, $limit = 70) {
+    $decoded = trim(amsaDecodeTextAdmin($value));
+    $singleLine = preg_replace('/\s+/', ' ', $decoded);
+    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+        return mb_strlen($singleLine) > $limit ? mb_substr($singleLine, 0, $limit) . '...' : $singleLine;
+    }
+    return strlen($singleLine) > $limit ? substr($singleLine, 0, $limit) . '...' : $singleLine;
+}
+
+function amsaTextIsLongAdmin($value, $limit = 70) {
+    $decoded = trim(amsaDecodeTextAdmin($value));
+    $singleLine = preg_replace('/\s+/', ' ', $decoded);
+    if (function_exists('mb_strlen')) {
+        return mb_strlen($singleLine) > $limit;
+    }
+    return strlen($singleLine) > $limit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -331,6 +373,29 @@ $showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $to
         color: #a92d2d;
     }
 
+    .description-cell {
+        min-width: 170px;
+        max-width: 260px;
+    }
+
+    .description-preview {
+        color: var(--amsa-text);
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .full-description-box {
+        background: #fff8ef;
+        border: 1px solid #eadbd2;
+        border-radius: 16px;
+        padding: 16px;
+        color: var(--amsa-text);
+        line-height: 1.7;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        text-align: left;
+    }
+
     .evidence-link {
         color: var(--amsa-wine);
         font-weight: 800;
@@ -439,6 +504,14 @@ $showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $to
     .pagination .page-item.disabled .page-link {
         color: #aaa;
         background: #f7f1ea;
+    }
+
+    /* Fix modal z-index and backdrop issues */
+    .modal {
+        z-index: 1065 !important;
+    }
+    .modal-backdrop {
+        z-index: 1050 !important;
     }
 
     @media (max-width: 991.98px) {
@@ -613,7 +686,14 @@ $showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $to
                             </thead>
                             <tbody>
                                 <?php foreach($requests as $request): ?>
-                                <?php $requestUserRole = normalizeRole($request['user_role'] ?? 'member'); ?>
+                                <?php
+                                    $requestUserRole = normalizeRole($request['user_role'] ?? 'member');
+                                    $fullRawDescription = trim((string) ($request['description'] ?? ''));
+                                    $fullDescription = amsaDecodeTextAdmin($fullRawDescription);
+                                    $descriptionLimit = 70;
+                                    $isLongDescription = amsaTextIsLongAdmin($fullRawDescription, $descriptionLimit);
+                                    $descriptionPreview = amsaTextPreviewAdmin($fullRawDescription, $descriptionLimit);
+                                ?>
                                 <tr>
                                     <td><?php echo $request['id']; ?></td>
                                     <td>
@@ -630,7 +710,20 @@ $showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $to
                                     </td>
                                     <td><?php echo htmlspecialchars($request['category_name']); ?></td>
                                     <td><strong><?php echo $request['points']; ?></strong></td>
-                                    <td><?php echo substr(htmlspecialchars($request['description']), 0, 50); ?>...</td>
+                                    <td class="description-cell">
+                                        <?php if ($fullRawDescription !== ''): ?>
+                                            <div class="description-preview">
+                                                <?php echo nl2br(htmlspecialchars($descriptionPreview)); ?>
+                                            </div>
+                                            <?php if ($isLongDescription): ?>
+                                                <button type="button" class="btn btn-sm btn-outline-primary amsa-btn amsa-btn-ghost amsa-btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#descriptionModalAdmin<?php echo (int) $request['id']; ?>">
+                                                    <i class="fas fa-align-left"></i> View Full
+                                                </button>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">No description</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <?php if($request['eop_evidence']): ?>
                                             <a href="#" class="evidence-link" data-bs-toggle="modal" 
@@ -743,9 +836,9 @@ $showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $to
                                 </div>
 
                                 <!-- Evidence Modal -->
-                                <div class="modal fade" id="evidenceModal<?php echo $request['id']; ?>" tabindex="-1">
+                                <div class="modal fade" id="evidenceModal<?php echo $request['id']; ?>" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
+                                        <div class="modal-content amsa-modal">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Evidence - <?php echo htmlspecialchars($request['category_name']); ?></h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -760,7 +853,10 @@ $showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $to
                                                         <i class="fas fa-download"></i> Download File
                                                     </a>
                                                 <?php endif; ?>
-                                                <p class="mt-3"><strong>Description:</strong><br><?php echo nl2br(htmlspecialchars($request['description'])); ?></p>
+                                                <p class="mt-3"><strong>Description:</strong><br><?php echo nl2br(htmlspecialchars($fullDescription)); ?></p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary amsa-btn amsa-btn-secondary" data-bs-dismiss="modal">Close</button>
                                             </div>
                                         </div>
                                     </div>
@@ -800,7 +896,76 @@ $showingEnd = $totalRequests > 0 ? min($showingStart + count($requests) - 1, $to
         </div>
     </div>
 
+    <!-- All Description Modals placed outside the table/card section to avoid Bootstrap nesting issues -->
+    <?php if (!empty($requests)): ?>
+        <?php foreach($requests as $request): ?>
+            <?php
+                $fullRawDescription = trim((string) ($request['description'] ?? ''));
+                $fullDescription = amsaDecodeTextAdmin($fullRawDescription);
+                $isLongDescription = amsaTextIsLongAdmin($fullRawDescription, 70);
+            ?>
+            <?php if ($isLongDescription && $fullRawDescription !== ''): ?>
+                <div class="modal fade" id="descriptionModalAdmin<?php echo (int) $request['id']; ?>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content amsa-modal">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Full Description</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <strong>Member:</strong> <?php echo htmlspecialchars($request['user_name']); ?><br>
+                                    <strong>Activity:</strong> <?php echo htmlspecialchars($request['category_name']); ?><br>
+                                    <strong>Points:</strong> <?php echo (int) $request['points']; ?>
+                                </div>
+                                <div class="full-description-box">
+                                    <?php echo nl2br(htmlspecialchars($fullDescription)); ?>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary amsa-btn amsa-btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            // Ensure that any lingering modal backdrops are cleaned up when a modal is hidden.
+            document.addEventListener('hidden.bs.modal', function () {
+                // Remove any stray backdrop elements.
+                document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+                    backdrop.remove();
+                });
+                // Restore body styles that Bootstrap might have left behind.
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            });
+
+            // Additional safety: if any modal fails to close properly via backdrop click,
+            // manually clean up after 300ms.
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(function(modal) {
+                modal.addEventListener('hide.bs.modal', function() {
+                    setTimeout(function() {
+                        if (document.querySelectorAll('.modal-backdrop').length > 0) {
+                            document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+                                backdrop.remove();
+                            });
+                            document.body.classList.remove('modal-open');
+                            document.body.style.overflow = '';
+                            document.body.style.paddingRight = '';
+                        }
+                    }, 150);
+                });
+            });
+        })();
+    </script>
 </body>
 </html>

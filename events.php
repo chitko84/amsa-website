@@ -261,9 +261,8 @@ function eventsPageUrl(array $overrides = []) {
       }
 
       .post-media {
-        aspect-ratio: 16 / 9;
         width: 100%;
-        height: auto;
+        height: 420px;
         background: #f7f7f5;
         border-bottom: 1px solid rgba(23, 24, 32, 0.06);
         display: flex;
@@ -424,6 +423,49 @@ function eventsPageUrl(array $overrides = []) {
         padding: 14px;
       }
 
+      .card-carousel {
+        width: 100%;
+        height: 100%;
+      }
+
+      .card-carousel .carousel-inner,
+      .card-carousel .carousel-item {
+        height: 100%;
+      }
+
+      .card-carousel-image {
+        width: 100%;
+        height: 420px;
+        object-fit: contain;
+        background: #f7f7f5;
+        padding: 8px;
+      }
+
+      .modal-carousel-image {
+        width: 100%;
+        max-height: 650px;
+        object-fit: contain;
+        background: #f7f7f5;
+      }
+
+      .carousel-control-prev-icon,
+      .carousel-control-next-icon {
+        filter: invert(1);
+      }
+
+      .card-carousel .carousel-control-prev,
+      .card-carousel .carousel-control-next {
+        width: 40px;
+      }
+
+      .card-carousel .carousel-indicators {
+        margin-bottom: 0.35rem;
+      }
+
+      .modal-carousel {
+        background: #f7f7f5;
+      }
+
       @media (max-width: 991.98px) {
         .events-hero {
           min-height: 560px;
@@ -448,6 +490,14 @@ function eventsPageUrl(array $overrides = []) {
 
         .filter-button {
           flex: 1 1 auto;
+        }
+
+        .post-media {
+          height: 300px;
+        }
+
+        .card-carousel-image {
+          height: 300px;
         }
       }
     </style>
@@ -541,13 +591,7 @@ function eventsPageUrl(array $overrides = []) {
                 <div class="featured-media">
                   <?php $featuredImages = getEventImages($featuredPost['id']); ?>
                   <?php if (!empty($featuredImages)): ?>
-                    <div class="content-gallery gallery-count-<?php echo min(count($featuredImages), 3); ?> w-100 h-100">
-                      <?php foreach (array_slice($featuredImages, 0, 3) as $featuredImage): ?>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#postModal<?php echo (int) $featuredPost['id']; ?>">
-                          <img src="uploads/<?php echo htmlspecialchars(basename($featuredImage['img_name'])); ?>" alt="<?php echo postText($featuredPost['title']); ?>">
-                        </a>
-                      <?php endforeach; ?>
-                    </div>
+                    <img src="uploads/<?php echo htmlspecialchars(basename($featuredImages[0]['img_name'])); ?>" alt="<?php echo postText($featuredPost['title']); ?>">
                   <?php else: ?>
                     <img src="<?php echo htmlspecialchars(postImage($featuredPost['id'], 'img/blog-2.jpg')); ?>" alt="<?php echo postText($featuredPost['title']); ?>">
                   <?php endif; ?>
@@ -610,15 +654,37 @@ function eventsPageUrl(array $overrides = []) {
                 <article class="card news-card h-100 amsa-card">
                   <div class="post-media">
                     <?php if (!empty($images)): ?>
-                      <div class="content-gallery gallery-count-<?php echo min(count($images), 3); ?> w-100 h-100">
-                        <?php foreach (array_slice($images, 0, 3) as $cardImage): ?>
-                          <a href="#" data-bs-toggle="modal" data-bs-target="#postModal<?php echo (int) $post['id']; ?>">
-                            <img src="uploads/<?php echo htmlspecialchars(basename($cardImage['img_name'])); ?>" alt="<?php echo postText($post['title']); ?>">
-                          </a>
-                        <?php endforeach; ?>
+                      <?php $cardCarouselId = 'cardCarousel' . (int) $post['id']; ?>
+                      <div id="<?php echo $cardCarouselId; ?>" class="carousel slide card-carousel" data-bs-ride="carousel" data-bs-interval="4000">
+                        <?php if (count($images) > 1): ?>
+                          <div class="carousel-indicators">
+                            <?php foreach ($images as $index => $cardImage): ?>
+                              <button type="button" data-bs-target="#<?php echo $cardCarouselId; ?>" data-bs-slide-to="<?php echo (int) $index; ?>" class="<?php echo $index === 0 ? 'active' : ''; ?>" <?php echo $index === 0 ? 'aria-current="true"' : ''; ?> aria-label="Slide <?php echo (int) ($index + 1); ?>"></button>
+                            <?php endforeach; ?>
+                          </div>
+                        <?php endif; ?>
+                        <div class="carousel-inner h-100">
+                          <?php foreach ($images as $index => $cardImage): ?>
+                            <div class="carousel-item h-100 <?php echo $index === 0 ? 'active' : ''; ?>">
+                              <a href="#" data-bs-toggle="modal" data-bs-target="#postModal<?php echo (int) $post['id']; ?>">
+                                <img src="uploads/<?php echo htmlspecialchars(basename($cardImage['img_name'])); ?>" class="d-block card-carousel-image" alt="<?php echo postText($post['title']); ?>">
+                              </a>
+                            </div>
+                          <?php endforeach; ?>
+                        </div>
+                        <?php if (count($images) > 1): ?>
+                          <button class="carousel-control-prev" type="button" data-bs-target="#<?php echo $cardCarouselId; ?>" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                          </button>
+                          <button class="carousel-control-next" type="button" data-bs-target="#<?php echo $cardCarouselId; ?>" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                          </button>
+                        <?php endif; ?>
                       </div>
                     <?php else: ?>
-                      <img src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo postText($post['title']); ?>">
+                      <img src="<?php echo htmlspecialchars($image); ?>" class="card-carousel-image" alt="<?php echo postText($post['title']); ?>">
                     <?php endif; ?>
                   </div>
                   <div class="news-card-body d-flex flex-column h-100">
@@ -641,12 +707,30 @@ function eventsPageUrl(array $overrides = []) {
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                   <div class="modal-content">
                     <?php if (!empty($images)): ?>
-                      <div class="modal-gallery p-3">
-                        <?php foreach (array_slice($images, 0, 3) as $modalImage): ?>
-                          <a href="uploads/<?php echo htmlspecialchars(basename($modalImage['img_name'])); ?>" target="_blank" rel="noopener">
-                            <img src="uploads/<?php echo htmlspecialchars(basename($modalImage['img_name'])); ?>" alt="<?php echo postText($post['title']); ?>">
-                          </a>
-                        <?php endforeach; ?>
+                      <?php $modalCarouselId = 'modalCarousel' . (int) $post['id']; ?>
+                      <div id="<?php echo $modalCarouselId; ?>" class="carousel slide modal-carousel" data-bs-ride="carousel" data-bs-interval="4000">
+                        <div class="carousel-indicators">
+                          <?php foreach ($images as $index => $modalImage): ?>
+                            <button type="button" data-bs-target="#<?php echo $modalCarouselId; ?>" data-bs-slide-to="<?php echo (int) $index; ?>" class="<?php echo $index === 0 ? 'active' : ''; ?>" <?php echo $index === 0 ? 'aria-current="true"' : ''; ?> aria-label="Slide <?php echo (int) ($index + 1); ?>"></button>
+                          <?php endforeach; ?>
+                        </div>
+                        <div class="carousel-inner">
+                          <?php foreach ($images as $index => $modalImage): ?>
+                            <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
+                              <a href="uploads/<?php echo htmlspecialchars(basename($modalImage['img_name'])); ?>" target="_blank" rel="noopener">
+                                <img src="uploads/<?php echo htmlspecialchars(basename($modalImage['img_name'])); ?>" class="d-block modal-carousel-image" alt="<?php echo postText($post['title']); ?>">
+                              </a>
+                            </div>
+                          <?php endforeach; ?>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#<?php echo $modalCarouselId; ?>" data-bs-slide="prev">
+                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#<?php echo $modalCarouselId; ?>" data-bs-slide="next">
+                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Next</span>
+                        </button>
                       </div>
                     <?php else: ?>
                       <img src="<?php echo htmlspecialchars($image); ?>" class="modal-hero-image" alt="<?php echo postText($post['title']); ?>">

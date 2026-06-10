@@ -19,6 +19,7 @@ $isSystemAdmin = canManageSettings();
         <div class="admin-menu-section">Content</div>
         <a href="add_news.php" class="<?php echo adminActive(['add_news.php','edit_news.php']); ?>"><i class="fas fa-newspaper"></i>News</a>
         <a href="add_event.php" class="<?php echo adminActive(['add_event.php','edit_event.php']); ?>"><i class="fas fa-calendar-alt"></i>Events</a>
+        <a href="manage_fundraising.php" class="<?php echo adminActive('manage_fundraising.php'); ?>"><i class="fas fa-hand-holding-heart"></i>Manage Fundraising</a>
         <a href="add_content.php?type=achievement" class="<?php echo (basename($_SERVER['PHP_SELF']) === 'add_content.php' && ($_GET['type'] ?? '') === 'achievement') || (basename($_SERVER['PHP_SELF']) === 'edit_content.php' && ($_GET['type'] ?? '') === 'achievement') ? 'active' : ''; ?>"><i class="fas fa-award"></i>Achievements</a>
         <a href="add_content.php?type=testimonial" class="<?php echo (basename($_SERVER['PHP_SELF']) === 'add_content.php' && ($_GET['type'] ?? '') === 'testimonial') || (basename($_SERVER['PHP_SELF']) === 'edit_content.php' && ($_GET['type'] ?? '') === 'testimonial') ? 'active' : ''; ?>"><i class="fas fa-comment-dots"></i>Testimonials</a>
         <a href="contact_messages.php" class="<?php echo adminActive('contact_messages.php'); ?>"><i class="fas fa-envelope-open-text"></i>Contact Messages</a>

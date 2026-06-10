@@ -279,6 +279,159 @@ body {
     margin-top: 14px;
 }
 
+.dashboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dashboard-list-item {
+    align-items: center;
+    background: linear-gradient(180deg, #fff, #fffdf8);
+    border: 1px solid var(--amsa-border);
+    border-radius: 14px;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    padding: 14px 16px;
+}
+
+.dashboard-list-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.dashboard-list-title {
+    color: var(--amsa-maroon-dark);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.35;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashboard-list-meta {
+    align-items: center;
+    color: var(--amsa-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.88rem;
+    margin-top: 6px;
+    min-width: 0;
+}
+
+.dashboard-list-meta-stack {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dashboard-list-meta span {
+    min-width: 0;
+}
+
+.dashboard-list-actions {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.dashboard-list-actions form {
+    margin: 0;
+}
+
+.admin-listing-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-listing-card {
+    background: #fff;
+    border: 1px solid var(--amsa-border);
+    border-radius: 12px;
+    box-shadow: 0 10px 26px rgba(95,38,38,0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    overflow: hidden;
+}
+
+.admin-listing-cover {
+    align-items: center;
+    background: #fff7e8;
+    color: var(--amsa-maroon);
+    display: flex;
+    height: 170px;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.admin-listing-cover img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.admin-listing-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 18px;
+}
+
+.admin-listing-body h4 {
+    color: var(--amsa-maroon-dark);
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.35;
+    margin-bottom: 8px;
+}
+
+.admin-listing-preview {
+    color: var(--amsa-muted);
+    font-size: 0.92rem;
+    margin-bottom: 14px;
+}
+
+.admin-listing-meta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.admin-listing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.admin-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+}
+
+.admin-pagination .page-link {
+    border-color: var(--amsa-border);
+    color: var(--amsa-maroon);
+}
+
+.admin-pagination .page-item.active .page-link {
+    background: var(--amsa-maroon);
+    border-color: var(--amsa-maroon);
+    color: #fff;
+}
+
 .stat-card .icon {
     width: 46px;
     height: 46px;
@@ -428,6 +581,20 @@ body {
         align-items: flex-start;
         flex-direction: column;
     }
+
+    .admin-listing-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-list-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .dashboard-list-actions {
+        justify-content: flex-start;
+        width: 100%;
+    }
 }
 
 @media (max-width: 575.98px) {
@@ -455,6 +622,36 @@ body {
     .admin-action-group .amsa-btn,
     .admin-form-actions .amsa-btn {
         width: 100%;
+    }
+
+    .admin-listing-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-listing-actions .btn,
+    .admin-listing-actions form {
+        width: 100%;
+    }
+
+    .admin-listing-actions form .btn {
+        width: 100%;
+    }
+
+    .dashboard-list-actions {
+        width: 100%;
+    }
+
+    .dashboard-list-actions .btn,
+    .dashboard-list-actions form {
+        width: 100%;
+    }
+
+    .dashboard-list-actions form .btn {
+        width: 100%;
+    }
+
+    .dashboard-list-title {
+        white-space: normal;
     }
 }
 

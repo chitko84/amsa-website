@@ -231,6 +231,9 @@
         <a href="admin/add_event.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'add_event.php' ? 'active' : ''; ?>">
             <i class="fas fa-plus-circle"></i> Add New Event
         </a>
+        <a href="admin/manage_fundraising.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'manage_fundraising.php' ? 'active' : ''; ?>">
+            <i class="fas fa-hand-holding-heart"></i> Manage Fundraising
+        </a>
         <a href="admin/dashboard.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">
             <i class="fas fa-chart-line"></i> Dashboard Analytics
         </a>

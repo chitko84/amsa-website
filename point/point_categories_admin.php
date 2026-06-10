@@ -64,6 +64,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $error = "Failed to enable category.";
         }
         $stmt->close();
+    } elseif (isset($_POST['permanent_delete_category'])) {
+        $id = intval($_POST['category_id']);
+
+        $stmt = $conn->prepare("DELETE FROM point_category WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        if ($stmt->execute()) {
+            if ($stmt->affected_rows > 0) {
+                $success = "Category permanently deleted successfully!";
+                logAuditAction('point_category_permanent_delete', 'point_category', $id);
+            } else {
+                $error = "Category not found or already deleted.";
+            }
+        } else {
+            $error = "Failed to permanently delete category. It may be linked to existing point requests. Disable it instead if you need to keep history safe.";
+        }
+        $stmt->close();
+    } elseif (isset($_POST['delete_all_categories'])) {
+        $countResult = $conn->query("SELECT COUNT(*) AS total FROM point_category");
+        $totalBeforeDelete = 0;
+        if ($countResult) {
+            $countRow = $countResult->fetch_assoc();
+            $totalBeforeDelete = (int) ($countRow['total'] ?? 0);
+        }
+
+        if ($conn->query("DELETE FROM point_category")) {
+            $success = "All point categories permanently deleted successfully!";
+            logAuditAction('point_category_delete_all', 'point_category', null, null, ['deleted_count' => $totalBeforeDelete]);
+        } else {
+            $error = "Failed to delete all categories. Some categories may be linked to existing point requests. Disable categories instead if you need to keep history safe.";
+        }
     }
 }
 
@@ -94,6 +124,22 @@ $categories = $result->fetch_all(MYSQLI_ASSOC);
         }
         .badge-active { background: var(--amsa-color-success, #2f8f57); color: #fff; }
         .badge-inactive { background: var(--amsa-color-inactive, #8f7a72); color: #fff; }
+        .danger-zone-btn {
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+        .category-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .danger-note {
+            border-left: 4px solid #dc3545;
+            background: #fff5f5;
+            padding: 12px 14px;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body class="points-page">
@@ -143,8 +189,13 @@ $categories = $result->fetch_all(MYSQLI_ASSOC);
 
             <div class="col-lg-8">
                 <div class="card shadow-sm amsa-card">
-                    <div class="card-header bg-white">
+                    <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between gap-2">
                         <h5 class="mb-0">Existing Categories</h5>
+                        <?php if (!empty($categories)): ?>
+                            <button type="button" class="btn btn-sm btn-danger amsa-btn amsa-btn-danger danger-zone-btn" onclick="confirmDeleteAllCategories()">
+                                <i class="fas fa-trash-alt"></i> Delete All Categories
+                            </button>
+                        <?php endif; ?>
                     </div>
                     <div class="card-body">
                         <?php if (empty($categories)): ?>
@@ -167,29 +218,34 @@ $categories = $result->fetch_all(MYSQLI_ASSOC);
                                         </div>
                                         <h6 class="text-primary"><?php echo (int) $category['points']; ?> points</h6>
                                         <p class="card-text small"><?php echo htmlspecialchars($category['description'] ?? ''); ?></p>
-                                        <button class="btn btn-sm btn-outline-primary amsa-btn amsa-btn-ghost amsa-btn-sm"
-                                            onclick='editCategory(<?php echo json_encode([
-                                                'id' => (int) $category['id'],
-                                                'name' => $category['category_name'],
-                                                'points' => (int) $category['points'],
-                                                'description' => $category['description'] ?? '',
-                                                'status' => $category['status'],
-                                            ]); ?>)'>
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                        <?php if ($category['status'] === 'active'): ?>
-                                            <button class="btn btn-sm btn-outline-danger amsa-btn amsa-btn-danger amsa-btn-sm" onclick="disableCategory(<?php echo (int) $category['id']; ?>, <?php echo htmlspecialchars(json_encode($category['category_name']), ENT_QUOTES); ?>)">
-                                                <i class="fas fa-ban"></i> Disable
+                                        <div class="category-actions">
+                                            <button class="btn btn-sm btn-outline-primary amsa-btn amsa-btn-ghost amsa-btn-sm"
+                                                onclick='editCategory(<?php echo json_encode([
+                                                    'id' => (int) $category['id'],
+                                                    'name' => $category['category_name'],
+                                                    'points' => (int) $category['points'],
+                                                    'description' => $category['description'] ?? '',
+                                                    'status' => $category['status'],
+                                                ]); ?>)'>
+                                                <i class="fas fa-edit"></i> Edit
                                             </button>
-                                        <?php else: ?>
-                                            <form method="POST" class="d-inline">
-                                                <?php echo csrfInput(); ?>
-                                                <input type="hidden" name="category_id" value="<?php echo (int) $category['id']; ?>">
-                                                <button type="submit" name="enable_category" class="btn btn-sm btn-outline-success amsa-btn amsa-btn-primary amsa-btn-sm">
-                                                    <i class="fas fa-check"></i> Enable
+                                            <?php if ($category['status'] === 'active'): ?>
+                                                <button class="btn btn-sm btn-outline-danger amsa-btn amsa-btn-danger amsa-btn-sm" onclick="disableCategory(<?php echo (int) $category['id']; ?>, <?php echo htmlspecialchars(json_encode($category['category_name']), ENT_QUOTES); ?>)">
+                                                    <i class="fas fa-ban"></i> Disable
                                                 </button>
-                                            </form>
-                                        <?php endif; ?>
+                                            <?php else: ?>
+                                                <form method="POST" class="d-inline">
+                                                    <?php echo csrfInput(); ?>
+                                                    <input type="hidden" name="category_id" value="<?php echo (int) $category['id']; ?>">
+                                                    <button type="submit" name="enable_category" class="btn btn-sm btn-outline-success amsa-btn amsa-btn-primary amsa-btn-sm">
+                                                        <i class="fas fa-check"></i> Enable
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
+                                            <button class="btn btn-sm btn-danger amsa-btn amsa-btn-danger amsa-btn-sm" onclick="confirmPermanentDeleteCategory(<?php echo (int) $category['id']; ?>, <?php echo htmlspecialchars(json_encode($category['category_name']), ENT_QUOTES); ?>)">
+                                                <i class="fas fa-trash-alt"></i> Permanent Delete
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -260,7 +316,64 @@ $categories = $result->fetch_all(MYSQLI_ASSOC);
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary amsa-btn amsa-btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" name="delete_category" class="btn btn-danger amsa-btn amsa-btn-danger">Delete</button>
+                        <button type="submit" name="delete_category" class="btn btn-danger amsa-btn amsa-btn-danger">Disable Category</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permanent Delete Single Category Modal -->
+    <div class="modal fade" id="permanentDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST">
+                    <?php echo csrfInput(); ?>
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Permanent Delete Category</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="category_id" id="permanent_delete_id">
+                        <div class="danger-note mb-3">
+                            <strong>Warning:</strong> This action will permanently remove this point category from the database.
+                        </div>
+                        <p>Are you sure you want to permanently delete <strong id="permanent_delete_name"></strong>?</p>
+                        <p class="text-muted mb-0">This cannot be undone. If this category is connected to existing point requests, the deletion may fail to protect your records.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary amsa-btn amsa-btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="permanent_delete_category" class="btn btn-danger amsa-btn amsa-btn-danger">
+                            <i class="fas fa-trash-alt"></i> Permanently Delete
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete All Categories Modal -->
+    <div class="modal fade" id="deleteAllModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST">
+                    <?php echo csrfInput(); ?>
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Delete All Categories</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="danger-note mb-3">
+                            <strong>Very dangerous action:</strong> This will permanently delete every point category from the database.
+                        </div>
+                        <p>Are you sure you want to delete <strong>all point categories</strong>?</p>
+                        <p class="text-muted mb-0">This cannot be undone. If categories are connected to existing point requests, the deletion may fail to protect your records.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary amsa-btn amsa-btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="delete_all_categories" class="btn btn-danger amsa-btn amsa-btn-danger">
+                            <i class="fas fa-trash-alt"></i> Yes, Delete All
+                        </button>
                     </div>
                 </form>
             </div>
@@ -284,6 +397,18 @@ $categories = $result->fetch_all(MYSQLI_ASSOC);
             document.getElementById('delete_id').value = id;
             document.getElementById('delete_name').textContent = name;
             var myModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            myModal.show();
+        }
+
+        function confirmPermanentDeleteCategory(id, name) {
+            document.getElementById('permanent_delete_id').value = id;
+            document.getElementById('permanent_delete_name').textContent = name;
+            var myModal = new bootstrap.Modal(document.getElementById('permanentDeleteModal'));
+            myModal.show();
+        }
+
+        function confirmDeleteAllCategories() {
+            var myModal = new bootstrap.Modal(document.getElementById('deleteAllModal'));
             myModal.show();
         }
     </script>

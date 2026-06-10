@@ -35,6 +35,20 @@ $stmt->bind_param("is", $id, $type);
 $stmt->execute();
 logAuditAction('delete_' . $type, 'post', $id);
 
+$returnTo = $_POST['return_to'] ?? '';
+$allowedReturn = false;
+if (is_string($returnTo) && $returnTo !== '') {
+    $allowedReturn = (bool) preg_match('/^add_event\.php(\?page=\d+)?$/', $returnTo)
+        || (bool) preg_match('/^add_news\.php(\?page=\d+)?$/', $returnTo)
+        || (bool) preg_match('/^add_content\.php\?type=(achievement|testimonial)(&page=\d+)?$/', $returnTo);
+}
+
+if ($allowedReturn) {
+    $separator = strpos($returnTo, '?') === false ? '?' : '&';
+    header('Location: ' . $returnTo . $separator . 'msg=deleted');
+    exit();
+}
+
 header('Location: dashboard.php?msg=deleted');
 exit();
 ?>

@@ -36,6 +36,55 @@ function myPointsHistoryUrl(array $overrides = []) {
     return 'my_points.php?' . http_build_query($params);
 }
 
+function cleanDisplayText($text)
+{
+    if ($text === null) {
+        return '';
+    }
+
+    $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+    $text = str_replace(
+        ["\\r\\n", "\\n", "\\r", "\\t"],
+        ["\n", "\n", "\n", "    "],
+        $text
+    );
+
+    $text = stripslashes($text);
+
+    return trim($text);
+}
+
+function truncateDisplayText($text, $limit = 150)
+{
+    $text = cleanDisplayText($text);
+
+    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+        if (mb_strlen($text, 'UTF-8') <= $limit) {
+            return $text;
+        }
+
+        return rtrim(mb_substr($text, 0, $limit, 'UTF-8')) . '...';
+    }
+
+    if (strlen($text) <= $limit) {
+        return $text;
+    }
+
+    return rtrim(substr($text, 0, $limit)) . '...';
+}
+
+function displayTextLength($text)
+{
+    $text = cleanDisplayText($text);
+
+    if (function_exists('mb_strlen')) {
+        return mb_strlen($text, 'UTF-8');
+    }
+
+    return strlen($text);
+}
+
 $approvedCount = 0;
 $pendingCount = 0;
 $rejectedCount = 0;
@@ -61,6 +110,84 @@ foreach ($userRequests as $request) {
     <link href="points-style.css" rel="stylesheet">
     <link href="../assets/css/amsa-chatbot.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .points-activity-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 240px;
+        }
+
+        .points-activity-title {
+            margin-bottom: 0;
+        }
+
+        .points-activity-preview {
+            color: var(--amsa-ink, #2b2020);
+            line-height: 1.5;
+            margin-bottom: 0.9rem;
+            min-height: 3.75em;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        .points-activity-footer {
+            align-items: flex-end;
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-top: auto;
+        }
+
+        .points-activity-meta {
+            color: var(--amsa-muted, #6f6262);
+            display: grid;
+            gap: 0.35rem;
+            font-size: 0.92rem;
+        }
+
+        .points-activity-actions {
+            display: flex;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+
+        .points-view-full-btn {
+            border-radius: 999px;
+            padding: 0.28rem 0.7rem;
+            font-size: 0.78rem;
+            line-height: 1.2;
+        }
+
+        .points-history-text {
+            max-width: 320px;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .points-history-preview {
+            max-width: 320px;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .points-history-actions {
+            margin-top: 0.35rem;
+        }
+
+        .points-description-modal .modal-content {
+            border-radius: 16px;
+        }
+
+        .points-description-modal .modal-header {
+            background: #fff7e7;
+        }
+
+        .points-description-modal-body {
+            white-space: normal;
+            word-break: break-word;
+        }
+    </style>
 </head>
 <body class="points-page">
     <?php include __DIR__ . '/includes/navbar.php'; ?>
@@ -137,19 +264,57 @@ foreach ($userRequests as $request) {
                     </form>
                     <div class="points-card-list mb-4">
                         <?php foreach (array_slice($userRequests, 0, 4) as $request): ?>
+                            <?php
+                            $cardModalId = 'descriptionModal_' . (int) $request['id'];
+                            $cardTitle = cleanDisplayText($request['category_name'] ?? '');
+                            $cardDescription = cleanDisplayText($request['description'] ?? '');
+                            $cardPreview = truncateDisplayText($cardDescription, 140);
+                            ?>
                             <div class="amsa-card points-activity-card">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="mb-0"><?php echo htmlspecialchars($request['category_name']); ?></h5>
+                                    <h5 class="points-activity-title"><?php echo htmlspecialchars($cardTitle); ?></h5>
                                     <span class="amsa-badge amsa-badge-<?php echo htmlspecialchars($request['status']); ?>"><?php echo ucfirst(htmlspecialchars($request['status'])); ?></span>
                                 </div>
-                                <p class="mb-3"><?php echo htmlspecialchars($request['description']); ?></p>
-                                <div class="points-activity-meta">
-                                    <span><i class="fas fa-calendar-alt me-1"></i><?php echo date('M d, Y', strtotime($request['request_date'])); ?></span>
-                                    <span><i class="fas fa-star me-1"></i><?php echo (int) $request['points']; ?> points</span>
+                                <p class="points-activity-preview"><?php echo nl2br(htmlspecialchars($cardPreview, ENT_QUOTES | ENT_HTML5, 'UTF-8')); ?></p>
+                                <div class="points-activity-footer">
+                                    <div class="points-activity-meta">
+                                        <span><i class="fas fa-calendar-alt me-1"></i><?php echo date('M d, Y', strtotime($request['request_date'])); ?></span>
+                                        <span><i class="fas fa-star me-1"></i><?php echo (int) $request['points']; ?> points</span>
+                                    </div>
+                                    <div class="points-activity-actions">
+                                        <button type="button" class="btn btn-outline-primary amsa-btn points-view-full-btn" data-bs-toggle="modal" data-bs-target="#<?php echo $cardModalId; ?>">View Full</button>
+                                    </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
+                    <?php foreach (array_slice($userRequests, 0, 4) as $request): ?>
+                        <?php
+                        $cardModalId = 'descriptionModal_' . (int) $request['id'];
+                        $cardTitle = cleanDisplayText($request['category_name'] ?? '');
+                        $cardDescription = cleanDisplayText($request['description'] ?? '');
+                        ?>
+                        <div class="modal fade points-description-modal" id="<?php echo $cardModalId; ?>" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <div>
+                                            <h5 class="modal-title mb-1"><?php echo htmlspecialchars($cardTitle); ?></h5>
+                                            <div class="text-muted small">
+                                                <span class="me-3"><strong>Status:</strong> <?php echo ucfirst(htmlspecialchars($request['status'])); ?></span>
+                                                <span class="me-3"><strong>Date:</strong> <?php echo date('M d, Y', strtotime($request['request_date'])); ?></span>
+                                                <span><strong>Points:</strong> <?php echo (int) $request['points']; ?></span>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body points-description-modal-body">
+                                        <?php echo nl2br(htmlspecialchars($cardDescription, ENT_QUOTES | ENT_HTML5, 'UTF-8')); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                     <?php if (empty($historyRequests)): ?>
                         <div class="amsa-empty-state mb-0">
                             <i class="fas fa-clipboard-list fa-2x mb-3 text-primary"></i>
@@ -173,10 +338,13 @@ foreach ($userRequests as $request) {
                                 <?php foreach ($historyRequests as $request): ?>
                                     <?php
                                     $badge = $request['status'] === 'approved' ? 'success' : ($request['status'] === 'pending' ? 'warning text-dark' : 'danger');
+                                    $historyRemarksId = 'remarksModal_' . (int) $request['id'];
+                                    $historyRemarks = cleanDisplayText($request['admin_remarks'] ?? '-');
+                                    $historyRemarksPreview = truncateDisplayText($historyRemarks, 120);
                                     ?>
                                     <tr>
                                         <td><?php echo date('M d, Y', strtotime($request['request_date'])); ?></td>
-                                        <td><?php echo htmlspecialchars($request['category_name']); ?></td>
+                                        <td class="points-history-text"><?php echo nl2br(htmlspecialchars(cleanDisplayText($request['category_name'] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')); ?></td>
                                         <td><strong><?php echo $request['status'] === 'approved' ? '+' : ''; ?><?php echo (int) $request['points']; ?></strong></td>
                                         <td><span class="badge bg-<?php echo $badge; ?> amsa-badge amsa-badge-<?php echo htmlspecialchars($request['status']); ?>"><?php echo ucfirst(htmlspecialchars($request['status'])); ?></span></td>
                                         <td>
@@ -186,12 +354,47 @@ foreach ($userRequests as $request) {
                                                 <span class="text-muted">None</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><?php echo htmlspecialchars($request['admin_remarks'] ?? '-'); ?></td>
+                                        <td class="points-history-text">
+                                            <div><?php echo nl2br(htmlspecialchars($historyRemarksPreview, ENT_QUOTES | ENT_HTML5, 'UTF-8')); ?></div>
+                                            <?php if (displayTextLength($historyRemarks) > 120): ?>
+                                                <div class="points-history-actions">
+                                                    <button type="button" class="btn btn-outline-primary amsa-btn points-view-full-btn" data-bs-toggle="modal" data-bs-target="#<?php echo $historyRemarksId; ?>">View Full</button>
+                                                </div>
+                                            <?php endif; ?>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
+                    <?php foreach ($historyRequests as $request): ?>
+                        <?php
+                        $historyRemarksId = 'remarksModal_' . (int) $request['id'];
+                        $historyRemarks = cleanDisplayText($request['admin_remarks'] ?? '-');
+                        ?>
+                        <?php if (displayTextLength($historyRemarks) > 120): ?>
+                            <div class="modal fade points-description-modal" id="<?php echo $historyRemarksId; ?>" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <div>
+                                                <h5 class="modal-title mb-1">Admin Remarks</h5>
+                                                <div class="text-muted small">
+                                                    <span class="me-3"><strong>Activity:</strong> <?php echo htmlspecialchars(cleanDisplayText($request['category_name'] ?? '')); ?></span>
+                                                    <span class="me-3"><strong>Status:</strong> <?php echo ucfirst(htmlspecialchars($request['status'])); ?></span>
+                                                    <span><strong>Date:</strong> <?php echo date('M d, Y', strtotime($request['request_date'])); ?></span>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body points-description-modal-body">
+                                            <?php echo nl2br(htmlspecialchars($historyRemarks, ENT_QUOTES | ENT_HTML5, 'UTF-8')); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
                     <?php endif; ?>
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
                         <span class="text-muted">Showing <?php echo (int) $historyStart; ?>&ndash;<?php echo (int) $historyEnd; ?> of <?php echo (int) $historyTotal; ?> requests</span>

@@ -56,6 +56,37 @@ CREATE TABLE `image` (
   `img_name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fundraising`
+--
+
+CREATE TABLE IF NOT EXISTS `fundraising` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` enum('published','draft') DEFAULT 'published',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fundraising_images`
+--
+
+CREATE TABLE IF NOT EXISTS `fundraising_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fundraising_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL,
+  `display_order` int(11) DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `fk_fundraising_images_fundraising` (`fundraising_id`),
+  CONSTRAINT `fk_fundraising_images_fundraising` FOREIGN KEY (`fundraising_id`) REFERENCES `fundraising` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Dumping data for table `image`
 --

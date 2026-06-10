@@ -36,6 +36,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $userRequests = getUserPointRequests($userId);
 $userPoints = getUserPoints($userId);
+
+function amsaDecodeText($value) {
+    $text = (string) ($value ?? '');
+
+    // Decode HTML entities even if the text was encoded more than once.
+    for ($i = 0; $i < 3; $i++) {
+        $decoded = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if ($decoded === $text) {
+            break;
+        }
+        $text = $decoded;
+    }
+
+    // Convert saved literal escape sequences into real readable formatting.
+    $text = str_replace(["\\r\\n", "\\n", "\\r", "\\t"], ["\n", "\n", "\n", "    "], $text);
+
+    // Remove unwanted slashes from saved escaped quotes, for example \"hello\".
+    $text = stripslashes($text);
+
+    return $text;
+}
+
+function amsaTextPreview($value, $limit = 85) {
+    $decoded = trim(amsaDecodeText($value));
+    $singleLine = preg_replace('/\s+/', ' ', $decoded);
+    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+        return mb_strlen($singleLine) > $limit ? mb_substr($singleLine, 0, $limit) . '...' : $singleLine;
+    }
+    return strlen($singleLine) > $limit ? substr($singleLine, 0, $limit) . '...' : $singleLine;
+}
+
+function amsaTextIsLong($value, $limit = 85) {
+    $decoded = trim(amsaDecodeText($value));
+    $singleLine = preg_replace('/\s+/', ' ', $decoded);
+    if (function_exists('mb_strlen')) {
+        return mb_strlen($singleLine) > $limit;
+    }
+    return strlen($singleLine) > $limit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -572,6 +612,60 @@ $userPoints = getUserPoints($userId);
             color: var(--amsa-muted);
         }
 
+        .description-preview-cell {
+            max-width: 300px;
+            min-width: 240px;
+        }
+
+        .description-preview-text,
+        .remarks-preview-text {
+            color: var(--amsa-text);
+            line-height: 1.55;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .view-full-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(107, 29, 29, 0.18);
+            background: #fffaf0;
+            color: var(--amsa-wine);
+            font-size: 0.78rem;
+            font-weight: 800;
+            transition: all 0.22s ease;
+        }
+
+        .view-full-btn:hover {
+            background: var(--amsa-gold);
+            color: #000;
+            transform: translateY(-1px);
+        }
+
+        .full-description-box {
+            background: #fffaf0;
+            border: 1px solid rgba(107, 29, 29, 0.12);
+            border-radius: 18px;
+            padding: 18px;
+            color: var(--amsa-text);
+            line-height: 1.75;
+            white-space: pre-wrap;
+            word-break: break-word;
+            text-align: left;
+        }
+
+        /* Fix modal z-index and backdrop issues */
+        .modal {
+            z-index: 1065 !important;
+        }
+        .modal-backdrop {
+            z-index: 1050 !important;
+        }
+
+
         @media (max-width: 991px) {
             .points-hero {
                 padding: 70px 0 85px !important;
@@ -856,12 +950,32 @@ $userPoints = getUserPoints($userId);
 
                                 <tbody>
                                     <?php foreach ($userRequests as $request): ?>
+                                        <?php
+                                            $decodedDescription = amsaDecodeText($request['description'] ?? '');
+                                            $descriptionPreview = amsaTextPreview($request['description'] ?? '', 85);
+                                            $descriptionIsLong = amsaTextIsLong($request['description'] ?? '', 85);
+                                            $descriptionModalId = 'descriptionModal' . (int) $request['id'];
+
+                                            $decodedRemarks = amsaDecodeText($request['admin_remarks'] ?? '-');
+                                            $remarksPreview = amsaTextPreview($request['admin_remarks'] ?? '-', 55);
+                                            $remarksIsLong = amsaTextIsLong($request['admin_remarks'] ?? '-', 55);
+                                            $remarksModalId = 'remarksModal' . (int) $request['id'];
+                                        ?>
                                         <tr>
                                             <td>
                                                 <strong><?php echo htmlspecialchars($request['category_name']); ?></strong>
                                             </td>
 
-                                            <td><?php echo htmlspecialchars($request['description']); ?></td>
+                                            <td class="description-preview-cell">
+                                                <div class="description-preview-text">
+                                                    <?php echo nl2br(htmlspecialchars($descriptionPreview, ENT_QUOTES, 'UTF-8')); ?>
+                                                </div>
+                                                <?php if ($descriptionIsLong): ?>
+                                                    <button type="button" class="btn view-full-btn" data-bs-toggle="modal" data-bs-target="#<?php echo htmlspecialchars($descriptionModalId); ?>">
+                                                        <i class="fas fa-expand-alt"></i> View Full
+                                                    </button>
+                                                <?php endif; ?>
+                                            </td>
 
                                             <td><?php echo date('M d, Y', strtotime($request['request_date'])); ?></td>
 
@@ -883,7 +997,16 @@ $userPoints = getUserPoints($userId);
                                                 <?php echo !empty($request['review_date']) ? date('M d, Y', strtotime($request['review_date'])) : 'N/A'; ?>
                                             </td>
 
-                                            <td><?php echo htmlspecialchars($request['admin_remarks'] ?? '-'); ?></td>
+                                            <td class="description-preview-cell">
+                                                <div class="remarks-preview-text">
+                                                    <?php echo nl2br(htmlspecialchars($remarksPreview, ENT_QUOTES, 'UTF-8')); ?>
+                                                </div>
+                                                <?php if ($remarksIsLong): ?>
+                                                    <button type="button" class="btn view-full-btn" data-bs-toggle="modal" data-bs-target="#<?php echo htmlspecialchars($remarksModalId); ?>">
+                                                        <i class="fas fa-expand-alt"></i> View Full
+                                                    </button>
+                                                <?php endif; ?>
+                                            </td>
 
                                             <td>
                                                 <span class="amsa-badge amsa-badge-<?php echo htmlspecialchars($request['status']); ?> status-badge status-<?php echo htmlspecialchars($request['status']); ?>">
@@ -909,7 +1032,97 @@ $userPoints = getUserPoints($userId);
         </div>
     </div>
 
+    <?php if (!empty($userRequests)): ?>
+        <!-- All modals are placed outside the table and even outside the .container to avoid any Bootstrap nesting issues -->
+        <?php foreach ($userRequests as $request): ?>
+            <?php
+                $decodedDescription = amsaDecodeText($request['description'] ?? '');
+                $descriptionModalId = 'descriptionModal' . (int) $request['id'];
+                $descriptionIsLong = amsaTextIsLong($request['description'] ?? '', 85);
+
+                $decodedRemarks = amsaDecodeText($request['admin_remarks'] ?? '-');
+                $remarksModalId = 'remarksModal' . (int) $request['id'];
+                $remarksIsLong = amsaTextIsLong($request['admin_remarks'] ?? '-', 55);
+            ?>
+            <?php if ($descriptionIsLong): ?>
+                <div class="modal fade" id="<?php echo htmlspecialchars($descriptionModalId); ?>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Full Activity Description</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-2"><strong>Activity:</strong> <?php echo htmlspecialchars($request['category_name']); ?></p>
+                                <p class="mb-3"><strong>Requested Date:</strong> <?php echo date('M d, Y', strtotime($request['request_date'])); ?></p>
+                                <div class="full-description-box"><?php echo nl2br(htmlspecialchars($decodedDescription, ENT_QUOTES, 'UTF-8')); ?></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($remarksIsLong): ?>
+                <div class="modal fade" id="<?php echo htmlspecialchars($remarksModalId); ?>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Full Admin Remarks</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-2"><strong>Activity:</strong> <?php echo htmlspecialchars($request['category_name']); ?></p>
+                                <p class="mb-3"><strong>Status:</strong> <?php echo ucfirst(htmlspecialchars($request['status'])); ?></p>
+                                <div class="full-description-box"><?php echo nl2br(htmlspecialchars($decodedRemarks, ENT_QUOTES, 'UTF-8')); ?></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            // Ensure that any lingering modal backdrops are cleaned up when a modal is hidden.
+            document.addEventListener('hidden.bs.modal', function () {
+                // Remove any stray backdrop elements.
+                document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+                    backdrop.remove();
+                });
+                // Restore body styles that Bootstrap might have left behind.
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            });
+
+            // Additional safety: if any modal fails to close properly via backdrop click,
+            // manually clean up after 300ms.
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(function(modal) {
+                modal.addEventListener('hide.bs.modal', function() {
+                    setTimeout(function() {
+                        if (document.querySelectorAll('.modal-backdrop').length > 0) {
+                            document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+                                backdrop.remove();
+                            });
+                            document.body.classList.remove('modal-open');
+                            document.body.style.overflow = '';
+                            document.body.style.paddingRight = '';
+                        }
+                    }, 150);
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
